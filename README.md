@@ -25,6 +25,7 @@
 |------|----------------|
 | **只有基本面，忽略资金面** | 新增 **Capital Flow 模块**：分析龙虎榜、公募抱团、大股东减持。 |
 | **忽略中国政策导向** | 新增 **Policy Cycle 模块**：定调政策是支持、中性还是压制。 |
+| **缺乏散户可执行的交易纪律** | 新增 **A_Share_Quant_Scorer 微型智能体**：基于 DeepSeek 铁血法则的量化打分裁判员，一票否决垃圾股，只做右侧交易。 |
 | **长文本注意力遗忘** | 引入 `<evidence_ledger>` (证据账本) XML标签强制锁定思考核心。 |
 | **报告全是干瘪文字** | 强制使用 **Mermaid** 语法绘制产业链全景图与利润流向图。 |
 | **幻觉（编造数据）** | 研究宪法八条铁律 + 输出前强制打印 Firewall Check 结果。 |
@@ -64,6 +65,8 @@ company-researcher/
 │   └── policy_cycle.md # 政策周期分析
 ├── industry/           # 【新增】产业链分析模块
 │   └── chain_mapping.md# 景气度传导映射
+├── agents/             # 【新增】专属子智能体 (Subagents)
+│   └── A_Share_Quant_Scorer.md # 散户量化打分裁判员 (基于 DeepSeek 实战法则)
 └── references/         # 知识库
 ```
 

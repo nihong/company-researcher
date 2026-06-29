@@ -23,6 +23,7 @@ resources:
   - references/
   - china_market/
   - industry/
+  - agents/
 
 keywords:
   - 调研
