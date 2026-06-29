@@ -7,9 +7,15 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.0.0
+  version: 3.0.2
   license: MIT
   source: https://github.com/nihong/company-researcher
+run_as: subagent
+model: deepseek-v4-pro
+allowed_tools:
+  - web_search
+  - web_fetch
+  - run_command
 ---
 
 # 机构级投研智能体（Institutional Research Agent v3.0 - A股买方特化版）
@@ -21,6 +27,19 @@ metadata:
 - **中国市场适配层 (China Equity Adaptation)** — A股专用的政策、资金与产业链景气度模型。
 - **标准化流水线 (SOP)** — 从接到任务到最终决策的严格工序，禁止跳步。
 - **防幻觉体系** — 证据等级、输出前 Firewall、红队攻击。
+
+---
+
+## 前置依赖 (Prerequisites)
+
+本 Skill 依赖以下工具链。缺失时自动降级运行（见第六章降级路径）。
+
+| 工具 | 用途 | 安装方式 |
+|------|------|----------|
+| `opencli` | 东方财富行情、雪球数据、多模型交叉验证（DeepSeek / 通义千问） | `npm i -g opencli` |
+| `opencli` 适配器 | `deepseek`, `qwen`, `xueqiu`, `eastmoney` | `opencli auth login` 后即用，无需额外安装 |
+
+> **分发说明**：若他人 clone 本 Skill，需先安装 `opencli` 并完成 `opencli auth login`，否则数据管道降级为纯网页搜索。报告中将自动标注「⚠️ 数据源降级」。
 
 ---
 
@@ -138,8 +157,42 @@ metadata:
 ---
 
 ## 第六章：工具与数据源
-1. `search_web`：优先指定 `site:cninfo.com.cn`、`site:eastmoney.com`。搜索时务必带上“减持”、“龙虎榜”、“机构调研”等 A 股特色关键词。
-2. `opencli deepseek ask ...` / `opencli qwen ask ...`：遇到复杂逻辑时，调度其他大模型进行交叉验证。
-3. `opencli xueqiu` / `opencli eastmoney`：获取实时行情和资金流向。
 
-**严禁因工具调用失败而编造数据，失败则回答【数据缺失】。**
+### 第一梯队：机构级数据管道（`opencli`，推荐）
+
+以下命令依赖 `opencli` 全局可用。若 `which opencli` 返回空，整节跳过，自动降级到第二梯队。
+
+| 命令 | 用途 | 典型调用 |
+|------|------|----------|
+| `opencli eastmoney quote` | A股/港股/美股实时行情 | `opencli eastmoney quote --symbol 000001` |
+| `opencli eastmoney kline` | K 线历史数据（分/日/周/月/前复权/后复权） | `opencli eastmoney kline --symbol 000001 --period day --count 250` |
+| `opencli eastmoney longhu` | 龙虎榜明细（交易所公开披露） | `opencli eastmoney longhu` |
+| `opencli eastmoney money-flow` | 主力资金净流入排行 | `opencli eastmoney money-flow --period today` |
+| `opencli eastmoney northbound` | 沪深港通北向/南向资金 | `opencli eastmoney northbound` |
+| `opencli eastmoney holders` | 十大流通股东（F10） | `opencli eastmoney holders --symbol 000001` |
+| `opencli eastmoney announcement` | 上市公司公告 | `opencli eastmoney announcement --symbol 000001` |
+| `opencli eastmoney sectors` | 行业/概念/地域板块排行 | `opencli eastmoney sectors --type 行业` |
+| `opencli eastmoney hot-rank` | 热股榜（需登录） | `opencli eastmoney hot-rank` |
+| `opencli xueqiu stock` | 雪球实时行情 | `opencli xueqiu stock --symbol SZ000001` |
+| `opencli xueqiu search` | 雪球股票搜索 | `opencli xueqiu search --keyword 宁德时代` |
+| `opencli xueqiu comments` | 个股讨论动态（判断市场情绪） | `opencli xueqiu comments --symbol SZ000001` |
+| `opencli xueqiu earnings-date` | 财报发布日期（公司大事） | `opencli xueqiu earnings-date --symbol SZ000001` |
+| `opencli deepseek ask` | 调度 DeepSeek 进行逻辑交叉验证 | `opencli deepseek ask "分析宁德时代的护城河是否正在收窄"` |
+| `opencli qwen ask` | 调度通义千问进行多模型交叉验证 | `opencli qwen ask "对以下看多逻辑进行逐条反驳：..."` |
+
+### 第二梯队：网页搜索兜底（`web_search` + `web_fetch`，始终可用）
+
+当 `opencli` 不可用，或需要搜索 opencli 覆盖不到的长尾信息（政策文件、行业新闻、竞对动态）时使用。
+
+| 工具 | 用途 | 典型 query 模板 |
+|------|------|----------------|
+| `web_search` | 全网搜索 | `site:cninfo.com.cn <股票代码> 年报`、`site:eastmoney.com <公司名> 减持`、`<行业> 政策 2025`、`<公司名> 龙虎榜`、`<公司名> 机构调研` |
+| `web_fetch` | 抓取搜索结果中的具体页面全文 | 对 `web_search` 返回的高价值链接逐篇抓取正文 |
+
+### 降级规则
+
+1. **检测**：执行前先 `which opencli`。若返回空，判定为降级模式。
+2. **标注**：报告开头必须打印 `⚠️ 数据源降级：本报告基于公开网页搜索，未使用机构级数据管道（opencli 未安装）。`
+3. **可信度扣减**：降级模式下，最终可信度评级自动降 1 星（不低于 ★1）。
+4. **功能等价映射**：行情数据 → `web_search` "<股票代码> 实时股价"；龙虎榜 → `web_search` "<股票代码> 龙虎榜"；资金流向 → `web_search` "<股票代码> 主力资金"；多模型交叉验证 → 在报告中自行完成逻辑正反推敲，并注明「本环节未使用外部模型交叉验证」。
+
