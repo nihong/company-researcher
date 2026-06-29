@@ -11,10 +11,6 @@ metadata:
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
-allowed_tools:
-  - web_search
-  - web_fetch
-  - run_command
 ---
 
 # 机构级投研智能体（Institutional Research Agent v3.0 - A股买方特化版）
