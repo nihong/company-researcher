@@ -2,17 +2,18 @@
 # Antigravity / WorkBuddy 自定义 Skill 清单文件
 
 name: company-researcher
-display_name: 机构级投研智能体
-version: 2.0.0
+display_name: 机构级A股买方投研智能体
+version: 3.0.0
 author: nihong
 license: MIT
 language: zh-CN
 
 description: >-
-  机构级公司与行业投研智能体。融合研究宪法（防幻觉铁律）、证据等级体系、
-  十步标准化 SOP、Research Firewall 输出前检查、红队攻击、行业自动识别、
-  预期差分析、投资假设管理等机制。目标：让每一个结论都有证据、每一个观点
-  都能被反驳、每一次研究都能持续演进。
+  从“AI写研报”升级为“AI辅助交易决策”。
+  深度契合 A 股资本市场特色的买方投研智能体 (v3.0)。在原有防幻觉铁律、
+  十步SOP、红队攻击的基础上，新增【中国股票市场适配层】（资金博弈、
+  政策周期、产业链景气度映射），并引入 `<evidence_ledger>` 防遗忘账本
+  与 Markdown Mermaid 可视化技术。目标：像真实基金经理一样做决策。
 
 instructions_file: SKILL.md
 
@@ -20,21 +21,19 @@ readme: README.md
 
 resources:
   - references/
+  - china_market/
+  - industry/
 
 keywords:
   - 调研
   - 分析
   - 研报
-  - 投研
-  - SWOT
-  - 估值
-  - 对比
+  - 买方
+  - A股
+  - 资金面
+  - 政策周期
+  - 预期差
+  - 红队攻击
   - 产业链
-  - 竞争格局
-  - 深度研究
-  - 商业模式
-  - 财务分析
-  - 热门板块
-  - 投研流水线
 
-disclaimer: 研究与学习辅助，非投资建议；数据均为公开披露内容。
+disclaimer: 研究与学习辅助，不构成投资建议。不预测涨跌、不给买卖指令、不承诺收益。
