@@ -11,7 +11,6 @@ metadata:
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
-model: deepseek-v4-pro
 allowed_tools:
   - web_search
   - web_fetch
@@ -38,6 +37,8 @@ allowed_tools:
 |------|------|----------|
 | `opencli` | 东方财富行情、雪球数据、多模型交叉验证（DeepSeek / 通义千问） | `npm i -g opencli` |
 | `opencli` 适配器 | `deepseek`, `qwen`, `xueqiu`, `eastmoney` | `opencli auth login` 后即用，无需额外安装 |
+
+> **模型建议**：本 Skill 涉及红队攻击、多模型交叉验证、防幻觉自检等深度推理任务，建议使用 reasoning 能力较强的模型（如 `deepseek-v4-pro`、`claude-sonnet-4-20250514` 等）。若平台仅提供轻量模型，可信度评级应额外扣减 1 星。
 
 > **分发说明**：若他人 clone 本 Skill，需先安装 `opencli` 并完成 `opencli auth login`，否则数据管道降级为纯网页搜索。报告中将自动标注「⚠️ 数据源降级」。
 
