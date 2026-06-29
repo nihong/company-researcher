@@ -1,75 +1,102 @@
 <div align="center">
 
-# 🔎 机构级 A 股买方投研智能体（Company Researcher）
+# 🔎 机构级 A 股买方投研智能体 (Company Researcher v3.0)
 
-### 防幻觉铁律 · 资金面博弈 · 政策周期解析 · 产业链图谱
+### 防幻觉铁律 · 资金面博弈 · 政策周期解析 · 产业链图谱 · 量化排雷裁判
 
-*「不再像卖方一样写空话研报，而是像买方一样做交易决策」*
+*「不再像卖方一样写干瘪的空话研报，而是像顶级买方一样做杀伐果断的交易决策」*
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![类型](https://img.shields.io/badge/类型-Agent%20Skill-black)
-![版本](https://img.shields.io/badge/版本-v3.0.0-success)
-![平台](https://img.shields.io/badge/平台-Antigravity%20·%20Claude%20·%20ChatGPT%20·%20Gemini-7c3aed)
+![类型](https://img.shields.io/badge/Type-Agent_Skill-black)
+![版本](https://img.shields.io/badge/Version-v3.0.0-success)
+![生态](https://img.shields.io/badge/Ecosystem-Antigravity%20%7C%20Claude%20%7C%20DeepSeek-7c3aed)
+![状态](https://img.shields.io/badge/Status-Production_Ready-brightgreen)
 
 </div>
 
 ---
 
-## 🎯 这是什么
+## 🔥 核心痛点与降维打击
 
-一个面向 **Antigravity / Claude / ChatGPT / Gemini** 等 AI Agent 的投研技能（Skill）。
+绝大多数开源的“AI 炒股助手”或“财报分析插件”在 A 股实战中都是**无效的**。它们只会生硬地背诵美国股市的“价值投资”教条，却对 A 股独有的**政策博弈、游资接力、大股东抽血**一无所知。
 
-**v3.0 版本是一次彻底的重构**。基于最新大模型的特性，我们为其增加了 **China Equity Adaptation Layer（中国股票市场适配层）**。它抛弃了传统的“估值+基本面”的美股分析套路，真正融入了 A 股的核心驱动力：**基本面 + 政策周期 + 产业趋势 + 资金博弈 + 主题情绪**。
+本项目（Company Researcher v3.0）是一次**彻底的重构**，专为高度博弈的中国 A 股市场特化定制！
 
-| 痛点 | 本 Skill (v3.0) 的解法 |
-|------|----------------|
-| **只有基本面，忽略资金面** | 新增 **Capital Flow 模块**：分析龙虎榜、公募抱团、大股东减持。 |
-| **忽略中国政策导向** | 新增 **Policy Cycle 模块**：定调政策是支持、中性还是压制。 |
-| **缺乏散户可执行的交易纪律** | 新增 **A_Share_Quant_Scorer 微型智能体**：基于 DeepSeek 铁血法则的量化打分裁判员，一票否决垃圾股，只做右侧交易。 |
-| **长文本注意力遗忘** | 引入 `<evidence_ledger>` (证据账本) XML标签强制锁定思考核心。 |
-| **报告全是干瘪文字** | 强制使用 **Mermaid** 语法绘制产业链全景图与利润流向图。 |
-| **幻觉（编造数据）** | 研究宪法八条铁律 + 输出前强制打印 Firewall Check 结果。 |
+| 传统 AI 炒股助手的通病 | 🎯 本 Agent (v3.0) 的降维打击解法 |
+|:---|:---|
+| **只看财报，不懂博弈** | 引入 **China Equity Adaptation** 层：重点扫描龙虎榜、公募抱团、机构大宗交易与游资情绪。 |
+| **生搬硬套美股教条** | 引入 **Policy Cycle** 模块：精准定调行业当前处于政策的“吹风期”、“落地期”还是“退潮期”。 |
+| **模棱两可的“建议关注”** | 独创 **A_Share_Quant_Scorer** 微型智能体：以 **DeepSeek 实战法则**为核心的量化裁判员，坚决执行一票否决与排雷，只做右侧交易。 |
+| **长文本注意力遗忘** | 强制引入 `<evidence_ledger>`（证据账本）XML 标签，输出报告前在后台死锁关键财务数字。 |
+| **文字堆砌，缺乏直观感** | 强制调用 **Mermaid** 引擎，全自动渲染清晰的“上下游产业链流转”与“核心利润流向”图谱。 |
+| **AI 常见的“幻觉编造”** | 设定“研究宪法八条铁律” + 强制执行红蓝军多空互搏 + 文末强制打印 **Firewall Check (防火墙清单)**。 |
+
+---
+
+## 🛠 核心能力矩阵
+
+### 1. 🔍 深度定性引擎 (The Qualitative Engine)
+基于 12 步严苛 SOP，从接到任务到输出报告绝不跳步。从“大基金三期落地”等宏观政策，到“黄磷/硫磺涨价对毛利率挤压”的微观颗粒度，精准刻画。
+
+### 2. 🧮 铁血量化裁判 (A_Share_Quant_Scorer)
+在定性报告生成后，触发末端量化裁判员。
+- **动态权重**：自动识别大盘处于“进攻市”还是“防守市”，动态调整基本面与动量的权重。
+- **六维雷达**：输出酷炫的 ASCII 进度条（涵盖基本面、景气度、估值、资金、政策、动量）。
+- **一票否决排雷**：遇到流动性陷阱、巨额解禁或立案调查，总分直接清零！
+
+### 3. 🛡️ 红队攻击与自我证伪 (Red Team Attack)
+每一份研报必须在末尾进行自我证伪：“我这份报告最大的事实错误可能在哪里？最可能打脸我的事件是什么？”——确保在极其复杂的 A 股环境中保持极端清醒。
+
+---
 
 ## 🚀 快速开始
 
-### 安装
-
-将本仓库克隆到 Antigravity 的全局技能目录：
+### 安装指南
+针对使用 Antigravity 或类似 AI 终端框架的用户，直接将本仓库克隆至全局定制化目录即可自动生效：
 
 ```bash
+mkdir -p ~/.gemini/config/skills
 cd ~/.gemini/config/skills/
 git clone https://github.com/nihong/company-researcher.git
 ```
 
-### 使用
+### 触发方式
+安装完成后，在终端直接向您的 AI 助手输入自然语言即可极速唤醒：
 
-安装后，在 Antigravity 中直接对话即可触发：
-
+```text
+"帮我深度调研一下兴福电子，并给出量化打分。"
+"以买方视角分析海光信息的投资机会。"
+"对比茅台和五粮液当前的资金筹码结构与政策周期。"
 ```
-帮我调研一下宁德时代
-以买方视角分析海光信息的投资机会
-对比茅台和五粮液的资金筹码结构
-```
 
-AI 会自动加载本 Skill，执行 12 步 SOP，并输出带可视化图表的实战研报。
+> **💡 高阶玩法 (Teamwork Preview)**: 
+> 结合多模型（如同时调度 Claude 3.5 Sonnet, DeepSeek, Gemini），您可以让该 Agent 自动化抓取各大模型的独立观点，提炼出没有偏见的“终极共识”，并排版为精美的 PDF 发送到您的邮箱！
 
-## 📂 目录结构 (v3.0)
+---
 
-```
+## 📂 项目结构
+
+```text
 company-researcher/
-├── SKILL.md            # 核心指令文件（包含12步SOP与宪法铁律）
-├── skill.yml           # 技能清单
-├── README.md           # 本文件
-├── china_market/       # 【新增】A股特色适配层模块
-│   ├── capital_flow.md # 资金博弈与筹码结构
-│   └── policy_cycle.md # 政策周期分析
-├── industry/           # 【新增】产业链分析模块
-│   └── chain_mapping.md# 景气度传导映射
-├── agents/             # 【新增】专属子智能体 (Subagents)
-│   └── A_Share_Quant_Scorer.md # 散户量化打分裁判员 (基于 DeepSeek 实战法则)
-└── references/         # 知识库
+├── SKILL.md            # 🧠 核心指令与心智模型（包含 12 步 SOP 与宪法铁律）
+├── skill.yml           # 📝 Agent 系统注册清单
+├── README.md           # 📖 本文档
+├── china_market/       # 🇨🇳 A股特色适配层模块
+│   ├── capital_flow.md # 资金博弈与筹码结构逻辑
+│   └── policy_cycle.md # 政策周期分析体系
+├── industry/           # 🏭 产业链分析模块
+│   └── chain_mapping.md# 景气度传导映射规则
+├── agents/             # 🤖 专属子智能体 (Subagents)
+│   └── A_Share_Quant_Scorer.md # 散户量化打分裁判员 (基于 DeepSeek 实战降维法则)
+└── references/         # 📚 外部研报、术语与知识库缓存
 ```
+
+---
+
+## 🌟 推广与致谢
+如果您觉得这个项目让您的 AI 在处理 A 股投研时变得更加“聪明且有实战价值”，请毫不吝啬地为本仓库点亮一颗 **Star ⭐️**！
+
+欢迎在 Issues 中提出您对 A 股独有因子提取的宝贵建议。
 
 ## 📜 License
-
-MIT
+MIT License © nihong
