@@ -24,6 +24,7 @@ resources:
   - china_market/
   - industry/
   - agents/
+  - tracking/
 
 keywords:
   - 调研
