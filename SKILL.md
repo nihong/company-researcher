@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.7.0
+  version: 3.7.1
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
@@ -128,7 +128,7 @@ opencli eastmoney northbound -f json                # 北向资金
 
 ### Step 1-12. 核心研究流程
 
-1. **历史档案检索 (Delta 准备)**：强制在 `/Users/gaopeng/Documents/Github/Company_Research_Reports/<股票代码_名称>/` 目录下检索是否有旧报告。如果有，提取前次的得分、评级与红队预警项，作为本轮 Delta 对比的基础。
+1. **历史档案检索 (Delta 准备)**：强制在终端**当前工作区**的 `Company_Research_Reports/<股票代码_名称>/` 目录下检索是否有旧报告。如果有，提取前次的得分、评级与红队预警项，作为本轮 Delta 对比的基础。
 2. **制定研究树**：拆解研究维度。
 3. **覆盖式搜索**：在 Step 0 结构化数据基础上，通过 search_web 补充财报解读、政策文件、竞争对手、产业链研报等长尾信息。
 4. **证据入账 (`<evidence_ledger>`)**：在输出报告正文前，必须先输出一个独立的 `<evidence_ledger>` 块，回吐所有核心数字及其来源 URL。Firewall 终检时，凡出现在报告中但未见于 ledger 的数据，一律判为不通过并触发重写。
@@ -152,7 +152,7 @@ opencli eastmoney northbound -f json                # 北向资金
 ### Step 15. 报告归档与严格命名 (Archiving)
 
 所有生成的报告**禁止**散落在工作区，**必须**输出至专属归档目录：
-`/Users/gaopeng/Documents/Github/Company_Research_Reports/<股票代码_股票名称>/`
+`<当前工作区路径>/Company_Research_Reports/<股票代码_股票名称>/`
 
 **强制命名规范**（将核心结论前置到文件名）：
 `YYYYMMDD_[评级]_[分数]分_报告类型.md`
@@ -160,7 +160,7 @@ opencli eastmoney northbound -f json                # 北向资金
 
 ### Step 16. 知识库导航页更新 (README Update)
 
-在完成个股研报归档后，**必须自动更新**知识库的全局导航页：`/Users/gaopeng/Documents/Github/Company_Research_Reports/README.md`。
+在完成个股研报归档后，**必须自动更新**知识库的全局导航页：`<当前工作区路径>/Company_Research_Reports/README.md`。
 你需要在该 README.md 中的【公司调研记录表】里，添加或更新该公司的最新调研记录（包括：调研日期、股票代码、股票名称、评级与分数、一句话核心逻辑、研报相对路径链接）。如果该文件不存在，则自动初始化该 Markdown 表格。
 
 ---
