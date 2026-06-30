@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.6.0
+  version: 3.7.0
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
@@ -157,6 +157,11 @@ opencli eastmoney northbound -f json                # 北向资金
 **强制命名规范**（将核心结论前置到文件名）：
 `YYYYMMDD_[评级]_[分数]分_报告类型.md`
 *(例：20260630_S级_100分_买方交易决策报告.md)*
+
+### Step 16. 知识库导航页更新 (README Update)
+
+在完成个股研报归档后，**必须自动更新**知识库的全局导航页：`/Users/gaopeng/Documents/Github/Company_Research_Reports/README.md`。
+你需要在该 README.md 中的【公司调研记录表】里，添加或更新该公司的最新调研记录（包括：调研日期、股票代码、股票名称、评级与分数、一句话核心逻辑、研报相对路径链接）。如果该文件不存在，则自动初始化该 Markdown 表格。
 
 ---
 
