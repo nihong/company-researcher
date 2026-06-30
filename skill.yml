@@ -22,6 +22,7 @@ readme: README.md
 resources:
   - references/
   - china_market/
+  - hk_market/
   - industry/
   - agents/
   - tracking/
