@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.7.1
+  version: 3.8.0
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
@@ -149,10 +149,11 @@ opencli eastmoney northbound -f json                # 北向资金
 
 每份报告交付后，**必须将关键数据追加写入 `tracking/ledger.csv`**（见 `tracking/backtest.md`）。登记字段包括：报告日期、股票代码、报告时股价、报告时PE、量化评分、评级、买方决策。30/60/90日后的股价字段留空，待用户触发回填时补全。此步骤是量化模型权重迭代的数据基础，禁止跳过。
 
-### Step 15. 报告归档与严格命名 (Archiving)
+### Step 15. 报告归档与物理目录隔离 (Archiving)
 
-所有生成的报告**禁止**散落在工作区，**必须**输出至专属归档目录：
-`<当前工作区路径>/Company_Research_Reports/<股票代码_股票名称>/`
+所有生成的报告**禁止**散落在工作区，必须**根据公司所属的宏观产业板块**进行一级目录隔离，归档路径如下：
+`<当前工作区路径>/Company_Research_Reports/<宏观产业板块>/<股票代码_股票名称>/`
+*(提示：板块可分类为“TMT与硬科技”、“大消费与医药”、“周期与大宗商品”、“高端制造与军工”、“红利与大金融”等)*
 
 **强制命名规范**（将核心结论前置到文件名）：
 `YYYYMMDD_[评级]_[分数]分_报告类型.md`
@@ -161,7 +162,8 @@ opencli eastmoney northbound -f json                # 北向资金
 ### Step 16. 知识库导航页更新 (README Update)
 
 在完成个股研报归档后，**必须自动更新**知识库的全局导航页：`<当前工作区路径>/Company_Research_Reports/README.md`。
-你需要在该 README.md 中的【公司调研记录表】里，添加或更新该公司的最新调研记录（包括：调研日期、股票代码、股票名称、评级与分数、一句话核心逻辑、研报相对路径链接）。如果该文件不存在，则自动初始化该 Markdown 表格。
+你需要在该 README.md 中，**根据该公司的最终评级（S级 / A级 / B级 / C-D级）**，将其调研记录精准插入到对应的 Markdown 表格分类下。
+表格记录应包括：调研日期、股票代码、股票名称、所属行业、综合得分、核心交易逻辑与一票否决原因、研报相对路径链接（注意补全行业子目录路径）。
 
 ---
 
