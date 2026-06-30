@@ -178,6 +178,7 @@ opencli eastmoney kline 000300 --period day --count 250 -f json
 | **抽血黑洞** | 大股东或董监高正在减持期，或未来3月内解禁比例 > 总股本5% | `opencli eastmoney holders` + 研报 |
 | **造假立案** | 被证监会立案调查 / 财务被出具非标审计意见 | 研报 + `search_web` |
 | **ST/退市风险** | 股票名称含 ST 或 *ST | `opencli eastmoney quote`（name 字段） |
+| **财务粉饰雷 (v3.6)** | ① 应收账款/营收占比畸高且恶化；或 ② 经营现金流连续两年严重负数且远低于净利润；或 ③ 存货异常暴增。 | 财报 + 研报 |
 
 ---
 

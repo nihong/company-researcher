@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.5.0
+  version: 3.6.0
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
@@ -190,7 +190,7 @@ opencli eastmoney northbound -f json                # 北向资金
 
 ### 五、商业模式与财务排雷
 - 怎么赚钱的核心逻辑。
-- 财务异常检测（现金流 vs 利润，应收账款，毛利率异常）。
+- **财务粉饰穿透 (v3.6 强制)**：必须专门审查【应收账款/营收占比】、【经营现金流 vs 净利润】、【存货周转率】。若发现“纸面富贵”（利润暴涨但钱全在应收账款里，或现金流连续严重失血），必须在打分环节触发一票否决死刑。
 
 ### 六、估值与预期差 (Variant Perception)
 - 市场一致预期 vs 我的独立判断（表格形式）。
