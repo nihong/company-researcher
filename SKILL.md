@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.1.0
+  version: 3.2.0
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
@@ -128,7 +128,7 @@ opencli eastmoney northbound -f json                # 北向资金
 
 ### Step 1-12. 核心研究流程
 
-1. **理解需求**：明确标的与目标。
+1. **历史档案检索 (Delta 准备)**：强制在 `/Users/gaopeng/Documents/Github/Company_Research_Reports/<股票代码_名称>/` 目录下检索是否有旧报告。如果有，提取前次的得分、评级与红队预警项，作为本轮 Delta 对比的基础。
 2. **制定研究树**：拆解研究维度。
 3. **覆盖式搜索**：在 Step 0 结构化数据基础上，通过 search_web 补充财报解读、政策文件、竞争对手、产业链研报等长尾信息。
 4. **证据入账 (`<evidence_ledger>`)**：在输出报告正文前，必须先输出一个独立的 `<evidence_ledger>` 块，回吐所有核心数字及其来源 URL。Firewall 终检时，凡出现在报告中但未见于 ledger 的数据，一律判为不通过并触发重写。
@@ -149,11 +149,25 @@ opencli eastmoney northbound -f json                # 北向资金
 
 每份报告交付后，**必须将关键数据追加写入 `tracking/ledger.csv`**（见 `tracking/backtest.md`）。登记字段包括：报告日期、股票代码、报告时股价、报告时PE、量化评分、评级、买方决策。30/60/90日后的股价字段留空，待用户触发回填时补全。此步骤是量化模型权重迭代的数据基础，禁止跳过。
 
+### Step 15. 报告归档与严格命名 (Archiving)
+
+所有生成的报告**禁止**散落在工作区，**必须**输出至专属归档目录：
+`/Users/gaopeng/Documents/Github/Company_Research_Reports/<股票代码_股票名称>/`
+
+**强制命名规范**（将核心结论前置到文件名）：
+`YYYYMMDD_[评级]_[分数]分_报告类型.md`
+*(例：20260630_S级_100分_买方交易决策报告.md)*
+
 ---
 
 ## 第五章：强制输出模板 (A 股买方研报)
 
 必须严格按照以下结构生成 Markdown 报告：
+
+### 〇、🔄 本次更新速览 (Delta Summary) —— 仅在二次调研时触发
+如果这是对该公司的非首次调研，**必须**在开头生成本模块：
+- **评分与评级变化**：如 `88分(A级) ↗ 100分(S级)`，并列出哪些因子的得分发生了改变及其核心原因。
+- **核心逻辑/红队预警验证**：说明上次报告中担忧的风险点是否已落地或被证伪。
 
 ### 一、执行摘要与买方决策
 - 一句话定性判断。
