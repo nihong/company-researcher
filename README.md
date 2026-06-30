@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![类型](https://img.shields.io/badge/Type-Agent_Skill-black)
-![版本](https://img.shields.io/badge/Version-v4.0.0-success)
+![版本](https://img.shields.io/badge/Version-v4.1.0-success)
 ![生态](https://img.shields.io/badge/Ecosystem-Antigravity%20%7C%20DeepSeek%20%7C%20Claude-7c3aed)
 
 </div>
