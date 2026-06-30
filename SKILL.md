@@ -7,7 +7,7 @@ description: >-
   要求强制使用 Markdown Mermaid 可视化产业链，强制执行红队自我攻击。
 metadata:
   author: nihong
-  version: 3.4.0
+  version: 3.5.0
   license: MIT
   source: https://github.com/nihong/company-researcher
 run_as: subagent
