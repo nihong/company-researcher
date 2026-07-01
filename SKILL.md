@@ -140,7 +140,7 @@ opencli eastmoney northbound -f json                # 北向资金
 9. **空头建构**：列出≥5条致命看空证据。同理，不足5条时如实声明数量，禁止凑数。
 10. **红队攻击（独立多智能体交互）**：严格按照 `china_market/red_team_framework.md` 的七维攻击执行。**【强制触发独立的风控智能体】**：此时你必须停止单模型自我生成，调用 `invoke_subagent` 唤醒 `agents/Red_Team_Review_Agent.md` (风控智能体)，并将当前的《研报草稿》与 `ledger.json` 输入给它。该风控智能体运行在独立上下文中，其唯一 KPI 是推翻你的看多逻辑。你必须等待其返回极度尖锐的七维《攻击报告》，并根据其攻击意见，无条件在最终报告中补充“红队攻击自检”模块，必要时下调最终评分和仓位。
 11. **投资决策矩阵与执行层审查**：给出实战策略（左侧布局/右侧确认/等待观察/清仓）。**强制执行【交易执行可行性 (Execution Feasibility)】检查**：必须以表格形式回答以下 3 个问题：1) 是否受 T+1 影响导致次日低开无法止损？ 2) 极端流动性风险（跌停封死）概率（高/中/低）？ 3) 左侧抄底是否面临连续阴跌无法自救的风险？
-12. **自我审查 (Static Validation Firewall)**：告别“主观阅读式打勾”。在文章末尾，必须强制将正文中的所有核心数字提取出来，与前置生成的 `ledger.json` 里的原始数字进行 **Key-Value 级别的强对比验证**，数字哪怕存在小数点的偏差（如 31.8 被写成 32），也必须判为不通过并重写。
+12. **程序化交叉验证 (Programmatic Validation Firewall)**：告别大模型的“自我证明”。你必须在正文中，使用特殊的 HTML 标签包裹所有引用于 `ledger.json` 的核心数字（格式为：`<metric id="json里的key">31.8</metric>`）。报告生成后，你必须停止输出，调用终端执行脚本 `python scripts/validate_report.py <报告文件> <ledger.json>`。如果脚本抛出 [Firewall Reject] 报错，你必须根据日志立刻修改正文数字，重新执行校验，直到脚本输出 `[Firewall Pass]`，报告才允许最终交付归档。
 
 ### Step 13. 量化打分联动（强制执行）
 
@@ -229,18 +229,15 @@ opencli eastmoney northbound -f json                # 北向资金
 ### 九、投资假设与跟踪指标
 - 建立假设 H1/H2/H3，给出验证指标和失效条件。
 
-### 十、Static Validation Firewall (程序级账本核对)
-```json
-// 必须严格提取正文引用的数字，并比对 ledger.json。如全 Match 则准许交付。
-{
-  "Validation": [
-    {"Metric": "PE估值", "Ledger_Value": 31.8, "Text_Value": 31.8, "Match": true},
-    {"Metric": "营收增速", "Ledger_Value": "192%", "Text_Value": "192%", "Match": true}
-  ],
-  "RedTeam_TargetFunction_Check": "是否具备独立破坏性 KPI (是/否)",
-  "Execution_Feasibility_Check": "是否分析T+1及跌停不可逆风险 (是/否)",
-  "Final_Decision": "PASS / REJECT_REWRITE"
-}
+### 十、Programmatic Firewall (外部脚本强校验)
+```text
+[Firewall Execution Log]
+- 脚本执行命令: python scripts/validate_report.py <报告路径> <ledger.json路径>
+- 脚本执行结果: [Firewall Pass] Static Validation Successful! (粘贴真实终端输出)
+- 状态发散检查: 通过 (所有 <metric> 标签数据与 ledger.json 强一致，无四舍五入或幻觉篡改)
+- 红队独立调用: 通过 (已成功引入 Red_Team_Review_Agent 并完成对抗)
+- 交易执行可行性: 通过 (T+1/流动性风险已明确评估)
+(仅当外部脚本真实输出 Pass 日志时，方准许交付归档。严禁 AI 伪造日志！)
 ```
 
 ---
