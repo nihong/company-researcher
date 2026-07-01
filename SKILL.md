@@ -102,7 +102,7 @@ run_as: subagent
 
 ---
 
-## 第四章：买方标准化研究 SOP（十四步执行法）
+## 第四章：买方标准化研究 SOP（十七步执行法）
 
 **禁止跳步。** 数据采集必须优先使用 `opencli` 结构化管道，搜索引擎作为补充。
 
@@ -111,11 +111,15 @@ run_as: subagent
 在任何分析开始前，**必须先执行以下 `opencli` 命令获取硬数据**。如果 `opencli` 不可用，降级为 `search_web`，并在报告开头标注 ⚠️ 数据源降级。
 
 ```bash
-# 必须执行以下命令（遇到缺失数据用 null 占位）
-opencli eastmoney quote <股票代码> -f json
-opencli eastmoney holders <股票代码> -f json
-opencli eastmoney money-flow --period 5day -f json
-opencli eastmoney block-trade <股票代码> -f json
+# 必须执行以下命令（遇到缺失数据用 null 占位，严格使用 --symbol 标志）
+opencli eastmoney quote --symbol <股票代码> -f json
+opencli eastmoney kline --symbol <股票代码> --period day --count 250 -f json
+opencli eastmoney holders --symbol <股票代码> -f json
+opencli eastmoney money-flow --symbol <股票代码> --period 5day -f json
+opencli eastmoney money-flow --symbol <股票代码> --period 1day -f json
+opencli eastmoney block-trade --symbol <股票代码> -f json
+opencli eastmoney longhu --symbol <股票代码> -f json
+opencli eastmoney announcement --symbol <股票代码> -f json
 ```
 
 > **数据锁定规则**：Step 0 获取的数据必须写入 evidence_ledger 的实时数据区块，后续引用只能从 ledger 提取，禁止凭记忆编写。
@@ -154,7 +158,7 @@ opencli eastmoney block-trade <股票代码> -f json
 | C 级 | 50-64 分 | 无操作价值，基本面或资金面明显走弱 | 0% |
 | D 级 | <50 分，或一票否决 | 坚决清仓/规避，删除自选 | 0% |
 
-> **一票否决条件（强制触发 D 级）**：① 大股东/董监高处于减持期；② 被证监会立案调查；③ 流动性陷阱（日均成交额 <5000 万）。
+> **一票否决条件（强制触发 D 级）**：① 大股东/董监高处于减持期；② 被证监会立案调查；③ 流动性陷阱（日均成交额 <5000 万）；④ 严重的纸面富贵（净利润与现金流灾难性背离）。
 
 ### Step 14. 跟踪快照登记（分级强制执行）
 

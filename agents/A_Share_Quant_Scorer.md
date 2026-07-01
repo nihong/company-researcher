@@ -15,19 +15,19 @@
 在打分前，**必须**通过 `opencli` 获取以下实时结构化数据。
 
 ```bash
-# 1. 实时行情（获取 PE、PB、市值、换手率、当日总成交额、日内跌幅）
-opencli eastmoney quote <股票代码> -f json
+# 1. 核心行情与K线
+opencli eastmoney quote --symbol <股票代码> -f json
+opencli eastmoney kline --symbol <股票代码> --period day --count 250 -f json
 
-# 2. 250日K线（计算年线位置、历史PE/PB分位）
-opencli eastmoney kline <股票代码> --period day --count 250 -f json
+# 2. 筹码与风控排雷 (一票否决必须项)
+opencli eastmoney holders --symbol <股票代码> -f json
+opencli eastmoney announcement --symbol <股票代码> -f json
 
-# 3. 主力资金流向（获取大单净流出金额，用于计算占比）
-opencli eastmoney money-flow --period 5day -f json
-opencli eastmoney money-flow --period 1day -f json
-
-# 4. 龙虎榜 / 大宗交易
-opencli eastmoney longhu -f json
-opencli eastmoney block-trade <股票代码> -f json
+# 3. 资金与博弈
+opencli eastmoney money-flow --symbol <股票代码> --period 5day -f json
+opencli eastmoney money-flow --symbol <股票代码> --period 1day -f json
+opencli eastmoney block-trade --symbol <股票代码> -f json
+opencli eastmoney longhu --symbol <股票代码> -f json
 ```
 
 ---
@@ -78,16 +78,25 @@ opencli eastmoney block-trade <股票代码> -f json
 
 ---
 
-## 第三步：输出最终评级与 14:30 实战决策
+## 第三步：一票否决黑名单核查 (强制死刑)
 
-根据第一步的基本面总分确定“基准评级与目标仓位”，再由第二步的“微观资金灯”进行物理压降。
+在输出最终评级前，**必须**核实以下 4 条死刑条件。只要触发任意一条，无论基本面得分多高，总评级直接强行降为 **D级 (0%仓位)**：
+1. **筹码雷**：大股东/董监高当前正处于减持计划期内。
+2. **监管雷**：近一年内被证监会立案调查或面临退市风险。
+3. **流动性雷**：日均成交额 < 5000 万（极易被闷杀）。
+4. **财务雷**：严重的“纸面富贵”（净利润与经营现金流发生灾难性背离）。
+
+## 第四步：输出最终评级与 14:30 实战决策
+
+根据第一步的基本面总分确定“基准评级与目标仓位”，再由第二步的“微观资金灯”和第三步的“黑名单”进行最终压降。
 
 | 基本面总分 | 初始评级 | 绿灯执行 | 黄灯执行 (强制压降) | 红灯执行 (强制平仓) |
 |---|---|---|---|---|
 | 90-100 | **S级 (强烈看多)** | 仓位 25% | 压降至 ≤ 5%，禁买 | 3日内分批清仓 |
 | 80-89 | **A级 (看多)** | 仓位 15% | 压降至 ≤ 5%，禁买 | 3日内分批清仓 |
 | 65-79 | **B级 (观望)** | 仓位 5% (底仓) | 压降至 0%，离场 | 立即清仓 |
-| < 65 | **C/D级 (规避)** | 0% | 0% | 0% |
+| 50-64 | **C级 (无操作价值)** | 0% | 0% | 0% |
+| < 50 | **D级 (一票否决/清仓)** | 0% | 0% | 0% |
 
 ### 🚨 强制输出格式与尾盘决策铁律
 

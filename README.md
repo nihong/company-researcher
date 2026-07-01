@@ -36,7 +36,7 @@ graph TD
     I --> J[Step 11: 资金三色灯与 T+1 纪律判定]
     J --> K[Step 13: 唤醒量化裁判 Quant Scorer]
     K --> L[严格按照分档标准输出最终评级 S-D]
-    L --> M([Step 15-16: 报告独立归档 & 更新导航页])
+    L --> M([Step 14-16: 追踪、归档 & 更新导航页])
 
     classDef red fill:#f9d0c4,stroke:#333,stroke-width:2px;
     class H,I red;
@@ -109,7 +109,7 @@ graph TD
 
 ---
 
-## ⚙️ 第四篇：十四步买方标准化流水线 (SOP)
+## ⚙️ 第四篇：十七步买方标准化流水线 (SOP)
 
 为了防止分析过程发散，系统必须严格按照以下流水线作业（禁止跳步）：
 
@@ -163,7 +163,7 @@ git clone https://github.com/nihong/company-researcher.git
 
 ### 3. 实战使用示例 (Prompts)
 
-安装完毕后，您可以直接用自然语言向您的智能体下达指令。系统会自动匹配并执行 14 步 SOP。
+安装完毕后，您可以直接用自然语言向您的智能体下达指令。系统会自动匹配并执行 17 步 SOP。
 
 **🔥 示例 1：个股深度诊断（建议用于计划重仓的标的）**
 
