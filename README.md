@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![类型](https://img.shields.io/badge/Type-Agent_Skill-black)
-![版本](https://img.shields.io/badge/Version-v4.1.0-success)
+![版本](https://img.shields.io/badge/Version-v4.2.0-success)
 ![生态](https://img.shields.io/badge/Ecosystem-Antigravity%20%7C%20DeepSeek%20%7C%20Claude-7c3aed)
 
 </div>
@@ -47,8 +47,9 @@
 - **Step 0 强制抓取 (v3.1新增)**：在生成任何一个字前，系统必须强制调用 `opencli eastmoney` 获取实时的 PE/PB、市值、主力资金净流出、十大流通股东，并写入 `<evidence_ledger>` 锁死。后续引用只能从底层账本调取。
 - **工业级装配线**：从制定研究树 → 产业链定位（Mermaid出图） → 预期差分析 → 红蓝交锋，14 步工序禁止跳步。
 
-### 5. 🛡️ 七维红队攻击与事后回测 (Red Team & Backtesting)
-- **强制七维红队 (v3.1新增)**：报告结尾不仅要自我攻击，且必须覆盖“事实、逻辑、竞争、资金、宏观、估值、执行”七个维度。**每条攻击必须带具体的证伪条件和时间节点**。
+### 5. 🛡️ 独立多智能体红队对抗与回测 (Multi-Agent Red Team & Backtesting)
+- **真·多智能体对抗 (v4.2重大升级)**：废弃单模型“人格分裂”式的自检，引入独立的 `Red_Team_Review_Agent`。主分析师生成草稿后，强制唤醒风控智能体，后者以“推翻主报告逻辑为唯一 KPI”，进行无情的跨上下文攻击。
+- **强制七维红队与物理证伪**：风控智能体必须在“事实、逻辑、竞争、资金、宏观、估值、执行”七个维度开火，且每条攻击必须带**未来 3-6 个月内可被明确证伪的物理条件和时间节点**。
 - **制度级执行层攻击 (v3.9新增)**：红队攻击的“执行层”被强制重定义为“交易制度与流程障碍”专场（如：T+1跌停导致无法止损、大宗交易价差过大、港股流动性枯竭），与实战痛点 100% 贴合。
 - **分级快照追踪 (v3.9新增)**：每份交付的报告都会自动在 `tracking/ledger.csv` 登记快照，且核心字段被设为绝对不可豁免。回测系统可根据**真实收益相关性**来迭代量化因子的权重，让系统“自我进化”。
 
