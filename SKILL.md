@@ -112,17 +112,11 @@ run_as: subagent
 在任何分析开始前，**必须先执行以下 `opencli` 命令获取硬数据**。如果 `opencli` 不可用，降级为 `search_web`，并在报告开头标注 ⚠️ 数据源降级。
 
 ```bash
-# === 个股数据 ===
-opencli eastmoney quote <股票代码> -f json          # 实时行情(PE/PB/市值/换手率/成交额)
-opencli eastmoney kline <股票代码> --period day --count 250 -f json  # 250日K线
-opencli eastmoney holders <股票代码> -f json        # 十大流通股东
-opencli eastmoney money-flow --period 5day -f json  # 5日主力资金净流入排行
-# === 大盘数据 ===
-opencli eastmoney quote 000300 -f json              # 沪深300实时行情
-opencli eastmoney kline 000300 --period day --count 250 -f json  # 沪深300年线
-# === 可选 ===
-opencli eastmoney longhu -f json                    # 龙虎榜
-opencli eastmoney northbound -f json                # 北向资金
+# 必须执行以下命令（遇到缺失数据用 null 占位）
+opencli eastmoney quote <股票代码> -f json
+opencli eastmoney holders <股票代码> -f json
+opencli eastmoney money-flow --period 5day -f json
+opencli eastmoney block-trade <股票代码> -f json
 ```
 
 > **数据锁定规则**：Step 0 获取的数据必须写入 evidence_ledger 的实时数据区块，后续引用只能从 ledger 提取，禁止凭记忆编写。
@@ -139,7 +133,9 @@ opencli eastmoney northbound -f json                # 北向资金
 8. **多头建构**：列出≥5条看多硬证据。若经穷尽搜索后实质论据不足5条，如实声明「仅有 N 条实质性论据」，严禁注水编造。
 9. **空头建构**：列出≥5条致命看空证据。同理，不足5条时如实声明数量，禁止凑数。
 10. **红队攻击（独立多智能体交互）**：严格按照 `china_market/red_team_framework.md` 的七维攻击执行。**【强制触发独立的风控智能体】**：此时你必须停止单模型自我生成，调用 `invoke_subagent` 唤醒 `agents/Red_Team_Review_Agent.md` (风控智能体)，并将当前的《研报草稿》与 `ledger.json` 输入给它。该风控智能体运行在独立上下文中，其唯一 KPI 是推翻你的看多逻辑。你必须等待其返回极度尖锐的七维《攻击报告》，并根据其攻击意见，无条件在最终报告中补充“红队攻击自检”模块，必要时下调最终评分和仓位。
-11. **投资决策矩阵与执行层审查**：给出实战策略（左侧布局/右侧确认/等待观察/清仓）。**强制执行【交易执行可行性 (Execution Feasibility)】检查**：必须以表格形式回答以下 3 个问题：1) 是否受 T+1 影响导致次日低开无法止损？ 2) 极端流动性风险（跌停封死）概率（高/中/低）？ 3) 左侧抄底是否面临连续阴跌无法自救的风险？
+11. **投资决策矩阵与执行层审查 (20%微观过滤网)**：给出实战策略（左侧布局/右侧确认/等待观察/清仓）。
+    - **【交易执行可行性 (Execution Feasibility)】检查**：必须以表格形式回答：1) 是否受T+1影响导致低开无法止损？ 2) 极端流动性风险（跌停封死）概率？ 3) 左侧抄底是否面临连续阴跌无法自救的风险？
+    - **【微观资金一票否决】**：严格核查 `ledger.json` 中的主力资金净流向、换手率与大宗交易折价率。如果近5日主力资金严重净流出，或存在深度折价的大宗交易（机构出逃），必须**触发执行层一票否决**，强制将实战策略降级为“暂缓建仓/等待观察”，严禁给出“直接买入/右侧追涨”建议。
 12. **程序化交叉验证 (Programmatic Validation Firewall)**：告别大模型的“自我证明”。你必须在正文中，使用特殊的 HTML 标签包裹所有引用于 `ledger.json` 的核心数字（格式为：`<metric id="json里的key">31.8</metric>`）。报告生成后，你必须停止输出，调用终端执行脚本 `python scripts/validate_report.py <报告文件> <ledger.json>`。如果脚本抛出 [Firewall Reject] 报错，你必须根据日志立刻修改正文数字，重新执行校验，直到脚本输出 `[Firewall Pass]`，报告才允许最终交付归档。
 
 ### Step 13. 量化打分联动（强制执行）
