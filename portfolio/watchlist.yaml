@@ -1,0 +1,18 @@
+# 核心候选池与买入触发器 (Watchlist Engine)
+watchlist:
+  - code: 01810.HK
+    name: 小米集团
+    score: 88
+    status: 等待估值
+    trigger:
+      - PE低于20
+      - 季报验证汽车毛利率改善
+      - 南向资金连续5日净流入
+
+  - code: 688256.SH
+    name: 寒武纪
+    score: 82
+    status: 等待回调
+    trigger:
+      - 股价回调至 60 日均线
+      - 核心客户大单落地
