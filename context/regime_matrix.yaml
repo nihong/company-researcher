@@ -1,0 +1,72 @@
+# 市场状态法则库 (Market Regime Matrix)
+# 由 Market Score (0-100) 统一驱动全局模块
+
+regimes:
+  # 状态 1：Risk On (85~100分) - 积极配置，成长优先
+  risk_on:
+    quant_impact:
+      beta_penalty: 0
+      weight_adjustment:
+        growth_peg: "+20%"
+        revenue_growth: "+10%"
+        dividend_yield: "-10%"
+    valuation_tolerance: "HIGH" # 估值容忍度高，允许使用 PS/PEG 估值
+    red_team_focus: 
+      - "远期逻辑证伪条件"
+      - "天花板空间受限"
+      - "大股东高位套现意愿"
+    execution:
+      traffic_light_override: "NONE"
+      forbid_left_side_buy: false
+      max_position_cap_multiplier: 1.0 # 允许满额仓位
+
+  # 状态 2：Balanced (70~84分) - 均衡配置，精选个股
+  balanced:
+    quant_impact:
+      beta_penalty: -2
+      weight_adjustment: {}
+    valuation_tolerance: "NORMAL"
+    red_team_focus: 
+      - "行业主线切换与资金抢跑风险"
+      - "微观筹码松动与机构分歧"
+      - "业绩兑现不及预期"
+    execution:
+      traffic_light_override: "NONE"
+      forbid_left_side_buy: false
+      max_position_cap_multiplier: 1.0
+
+  # 状态 3：Risk Control (50~69分) - 降低仓位，防守反击
+  risk_control:
+    quant_impact:
+      beta_penalty: -5
+      weight_adjustment: 
+        dividend_yield: "+10%"
+        cash_flow: "+10%"
+        growth_peg: "-15%"
+    valuation_tolerance: "STRICT" # 要求极高的安全边际，倾向 PB/DCF
+    red_team_focus: 
+      - "行业价格战与毛利率恶化"
+      - "应收账款坏账风险"
+      - "机构抱团瓦解踩踏"
+    execution:
+      traffic_light_override: "NONE"
+      forbid_left_side_buy: true # 严禁左侧接飞刀，必须等右侧确认
+      max_position_cap_multiplier: 0.5 # 仓位上限强制减半
+
+  # 状态 4：Risk Off (<50分) - 现金为王，绝对防守
+  risk_off:
+    quant_impact:
+      beta_penalty: -15
+      weight_adjustment: 
+        dividend_yield: "+30%"
+        pb_ratio: "+20%"
+        growth_peg: "-50%"
+    valuation_tolerance: "EXTREME_STRICT" # 不看成长，只看破净和清算价值
+    red_team_focus: 
+      - "现金流断裂与债务违约风险"
+      - "大股东高位质押平仓风险"
+      - "系统性流动性危机带来的估值无底洞"
+    execution:
+      traffic_light_override: "YELLOW_OR_RED" # 强制最高黄灯，极其恶劣直接红灯
+      forbid_left_side_buy: true
+      max_position_cap_multiplier: 0.2 # 极度压缩仓位，甚至要求 0 仓位观望
