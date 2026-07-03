@@ -6,7 +6,7 @@
 **“不仅是发现好公司，更是发现好机会。用基本面看底，用资金面看顶。”**
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![版本](https://img.shields.io/badge/Version-v4.0-success)
+![版本](https://img.shields.io/badge/Version-v4.3-success)
 ![引擎](https://img.shields.io/badge/Reasoning_Core-DeepSeek_Expert-red)
 </div>
 
