@@ -24,24 +24,28 @@ _(注：本文档旨在为您提供全景式的决策逻辑速查表，防止在
 
 ```mermaid
 graph TD
-    A([用户发起投研查询]) --> B{Step 0: 数据管道检测}
-    B -- opencli 可用 --> C[抓取东财/雪球量化硬数据]
-    B -- opencli 缺失 --> D[⚠️ 触发降级: 纯网页搜索]
-    C --> E[Step 2-4: 事实锁定入账 ledger.json]
-    D --> E
-    E --> F[Step 5-7: 基本面排雷与产业链解构]
-    F --> G[Step 8: 建构核心多头逻辑]
-    G --> H[Step 10: 唤醒独立红队 Red Team]
-    H -.->|强制调用 DeepSeek Expert 外脑| I[执行七维交叉火力攻击]
-    I --> J[Step 11: 资金三色灯与 T+1 纪律判定]
-    J --> K[Step 13: 唤醒量化裁判 Quant Scorer]
-    K --> L[严格按照分档标准输出最终评级 S-D]
-    L --> M([Step 14-16: 追踪、归档 & 更新导航页])
+    A([用户发起投研查询]) --> B{Step 0: 三级容灾数据采集}
+    B -- Tier 1: 绝对主力 --> C[Python 网关 akshare 抓取极速数据]
+    B -- Tier 2: 降级备用 --> D[opencli 终端命令抓取]
+    B -- Tier 3: 兜底底线 --> E[⚠️ 严重降级: 全网搜索引擎]
+    C --> F[Step 2-4: 事实锁定入账 ledger/raw_data]
+    D --> F
+    E --> F
+    F --> G[Step 5-7: 基本面排雷与产业链解构]
+    G --> H[Step 8: 建构核心多头逻辑]
+    H --> I[Step 10: 唤醒独立红队 Red Team]
+    I -.->|强制调用 DeepSeek Expert 外脑| J[执行七维交叉火力攻击]
+    J --> K[Step 11: 资金三色灯与 T+1 纪律判定]
+    K --> L[Step 13: 唤醒量化裁判 Quant Scorer]
+    L --> M[严格按照分档标准输出最终评级 S-D]
+    M --> N([Step 14-16: 追加台账 & 全自动渲染 README 面板])
 
     classDef red fill:#f9d0c4,stroke:#333,stroke-width:2px;
-    class H,I red;
+    class I,J,E red;
     classDef green fill:#d4edda,stroke:#333,stroke-width:2px;
-    class C,K green;
+    class C,L green;
+    classDef yellow fill:#fff3cd,stroke:#333,stroke-width:2px;
+    class D yellow;
 ```
 
 ---
@@ -126,14 +130,14 @@ graph TD
 
 ---
 
-## ⚠️ 第五篇：系统降级与数据管道说明
+## ⚠️ 第五篇：系统降级与三级数据管道说明
 
-由于个人投资者缺乏机构级的 Level-2 接口，本系统极度依赖外部数据管道，你需要了解以下限制：
+由于个人投资者缺乏机构级的 Level-2 接口，本系统极度依赖外部数据管道，已构建严密的容灾机制：
 
-- **完美模式**：系统正常检测到 `opencli` 命令行工具。此时 AI 能获取精确的主力资金净流入、十大流通股东、历史精准 K 线等硬数据，打分最严谨。
-- **降级模式 (Fallback)**：如果系统未安装或无法调用 `opencli`，引擎将自动触发**“网页搜索兜底”**。
-  - **影响**：失去精准的实时行情与资金流数据。
-  - **惩罚**：在降级模式下产出的报告，其最终可信度评级将**自动强制扣减 1 星**，并在报告开头打印 `⚠️ 数据源降级` 警告。
+- **Tier 1 (绝对主力)**：优先调用自带的 Python 网关 `scripts/fetch_market_data.py`，底层使用 `akshare` 库直接穿透东方财富、新浪、腾讯等 API。极速、稳定、抗反爬。
+- **Tier 2 (降级备用)**：如果 Python 网关异常，自动无缝切换至终端工具 `opencli` 获取备用数据。
+- **Tier 3 (搜索兜底)**：如果所有结构化 API 均断开，引擎将自动触发**“网页搜索兜底”**。
+  - **惩罚**：在搜索降级模式下产出的报告，其最终可信度评级将**自动强制扣减 2 星**，并在报告开头打印 `⚠️ 严重数据降级` 警告。
 
 ---
 
@@ -141,13 +145,14 @@ graph TD
 
 ### 1. 前置依赖安装 (必做)
 
-本系统依赖 `opencli` 桥接深度的金融数据和 DeepSeek 专家推理模型，请在您的主机终端执行以下命令：
+本系统依赖 `akshare` 和 `opencli` 桥接深度的金融数据，请在您的终端执行以下命令：
 
 ```bash
-# 全局安装数据管道工具
-npm i -g opencli
+# 安装第一梯队数据引擎
+pip install akshare pandas
 
-# 登录并验证各平台适配器（涵盖东财、雪球、DeepSeek等）
+# 安装第二梯队数据引擎
+npm i -g opencli
 opencli auth login
 ```
 
@@ -165,17 +170,11 @@ git clone https://github.com/nihong/company-researcher.git
 
 安装完毕后，您可以直接用自然语言向您的智能体下达指令。系统会自动匹配并执行 17 步 SOP。
 
-**🔥 示例 1：个股深度诊断（建议用于计划重仓的标的）**
-
+**🔥 示例 1：个股深度诊断**
 > “帮我深度调研一下 宁德时代 (300750)，请严格执行红队攻击和量化打分，我要决定是否把它纳入明年的长线底仓。”
 
-**🔥 示例 2：港股特化分析（自动切换港股逻辑）**
-
+**🔥 示例 2：港股特化分析**
 > “以买方视角分析 腾讯控股（0700.HK）的投资机会。注意核查其南向资金的定价权变动，以及当前的高股息溢价是否合理。”
-
-**🔥 示例 3：复盘与追踪（二次调研）**
-
-> “重新评估 贵州茅台 (600519)。我们上个月刚出过它的研报，请提取历史档案进行 Delta 对比，看看当时的红队预警现在是否已经兑现？”
 
 ---
 
@@ -183,18 +182,22 @@ git clone https://github.com/nihong/company-researcher.git
 
 ```text
 company-researcher/
-├── SKILL.md                  # 🌟 主干文件：包含 14 步 SOP 流水线、评级仓位上限、输出模板
+├── SKILL.md                  # 🌟 主干宪法：17 步 SOP 流水线、评级仓位上限、输出模板
 ├── README.md                 # 📖 备忘录：本文档说明书
 ├── agents/
-│   ├── Red_Team_Review_Agent.md # 🔴 风控智能体：想修改 DeepSeek 攻击提示词，来这里！
-│   └── A_Share_Quant_Scorer.md  # ⚖️ 量化裁判员：想调整 100分制 的扣分规则，来这里！
+│   ├── Red_Team_Review_Agent.md # 🔴 风控智能体：七维攻击核心模型
+│   └── A_Share_Quant_Scorer.md  # ⚖️ 量化裁判员：打分阈值与一票否决规则
+├── scripts/                  
+│   ├── fetch_market_data.py     # 🚀 数据网关：基于 akshare 的三级容灾抓取脚本
+│   └── render_dashboard.py      # 📊 渲染引擎：一键生成极客数据看板 README.md
 ├── china_market/
-│   └── red_team_framework.md # ⚔️ 攻击框架：定义了七个维度的具体攻击手法
+│   └── red_team_framework.md # ⚔️ 攻击框架：中国市场专属的做空/避雷逻辑
 ├── hk_market/
-│   ├── hk_regime.md          # 🇭🇰 港股制度：T+0 与做空机制的逻辑适配
-│   └── hk_quant_adaptation.md# 🇭🇰 港股打分：老千股与高股息的特殊打分规则
+│   ├── hk_regime.md          # 🇭🇰 港股制度：T+0 与做空机制适配
+│   └── hk_quant_adaptation.md# 🇭🇰 港股打分：老千股与高股息打分规则
 └── tracking/
-    └── backtest.md           # 📊 追踪回测：交易快照 (ledger.csv) 的表头定义
+    ├── backtest.md           # 📊 追踪回测：台账 (ledger.csv) 的录入铁律
+    └── readme_dashboard.md   # 🖥️ 面板规范：Top 20 极客看板的过滤与渲染标准
 ```
 
 ## 📜 License
