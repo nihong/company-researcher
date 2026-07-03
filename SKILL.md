@@ -185,9 +185,12 @@ opencli eastmoney announcement --symbol <股票代码> -f json
 
 ### Step 16. 知识库导航页更新 (README Update)
 
-在完成个股研报归档后，**必须自动更新**知识库的全局导航页：`<当前工作区路径>/Company_Research_Reports/README.md`。
-你需要在该 README.md 中，**根据该公司的最终评级（S级 / A级 / B级 / C-D级）**，将其调研记录精准插入到对应的 Markdown 表格分类下。
-表格记录应包括：调研日期、股票代码、股票名称、所属行业、综合得分、资金灯状态（🟢/🟡/🔴）、核心交易逻辑与一票否决原因、研报相对路径链接（注意补全行业子目录路径）。
+在完成个股研报归档并登记 `ledger.csv` 后，**绝对禁止人工或 AI 拼凑排版 README**。
+你必须调用终端执行专门的渲染脚本，将底层台账全自动渲染为极客数据看板：
+`python scripts/render_dashboard.py <当前工作区路径>`
+
+> **看板规范指引**：关于看板的渲染约束与 Top 20 机制，详见 `tracking/readme_dashboard.md`。该 Python 脚本已内置规则，会自动按日期倒序截取最新 20 份报告，提纯核心决策信号，并自动覆写全局导航页。
+
 
 ---
 
