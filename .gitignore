@@ -1,5 +1,4 @@
 .DS_Store
-references/cache/*
-!references/cache/.gitkeep
+.reasonix/
 node_modules/
 *.log
