@@ -106,23 +106,32 @@ run_as: subagent
 
 **禁止跳步。** 数据采集必须优先使用 `opencli` 结构化管道，搜索引擎作为补充。
 
-### Step 0. 结构化数据采集（强制前置，禁止跳过）
+### Step 0. 结构化数据采集（三级容灾架构，强制前置）
 
-在任何分析开始前，**必须先执行以下 `opencli` 命令获取硬数据**。如果 `opencli` 不可用，降级为 `search_web`，并在报告开头标注 ⚠️ 数据源降级。
+在任何分析开始前，**必须严格按照以下优先级执行数据采集**。坚决杜绝因单点接口故障而盲目脑补。
 
+#### 第一级防线（绝对主力）：Python 网关 (akshare)
+必须首先调用技能库内置的极客数据网关脚本。该脚本底层自动封装了新浪、东财、腾讯等多路 API 的反爬和重试机制：
 ```bash
-# 必须执行以下命令（遇到缺失数据用 null 占位，严格使用 --symbol 标志）
-opencli eastmoney quote --symbol <股票代码> -f json
-opencli eastmoney kline --symbol <股票代码> --period day --count 250 -f json
-opencli eastmoney holders --symbol <股票代码> -f json
-opencli eastmoney money-flow --symbol <股票代码> --period 5day -f json
-opencli eastmoney money-flow --symbol <股票代码> --period 1day -f json
-opencli eastmoney block-trade --symbol <股票代码> -f json
-opencli eastmoney longhu --symbol <股票代码> -f json
-opencli eastmoney announcement --symbol <股票代码> -f json
+python scripts/fetch_market_data.py <股票代码> <当前工作区/股票所属目录>
+```
+> 若执行成功，核心的现价、K线、资金流向将被锁定在指定的 JSON 文件中，作为唯一事实源。
+
+#### 第二级防线（备用轮询）：`opencli` 命令行
+如果 Python 网关报错（极少发生），立即切换为 `opencli` 终端命令：
+```bash
+# 注意：股票代码为位置参数，不要带 --symbol
+opencli eastmoney quote <股票代码> -f json
+opencli eastmoney kline <股票代码> --limit 250 -f json
+opencli eastmoney holders <股票代码> -f json
+opencli xueqiu stock <股票代码> -f json
 ```
 
-> **数据锁定规则**：Step 0 获取的数据必须写入 evidence_ledger 的实时数据区块，后续引用只能从 ledger 提取，禁止凭记忆编写。
+#### 第三级防线（底线兜底）：全网搜索引擎
+只有在前两道结构化接口均发生 Timeout 或 Forbidden 时，才允许使用 `search_web` 搜索“<股票名称> 实时股价/财报”。
+> **⚠️ 惩罚机制**：一旦降级到第三级，必须在最终报告开头打印红色警报 `⚠️ 严重数据降级：底层 API 全面阻断，本报告基于搜索引擎生成，极具幻觉风险`，并强制将可信度扣减 2 星。
+
+> **数据锁定铁律**：无论通过哪级防线获取的数据，必须写入 `ledger.json` 或 `raw_market_data.json` 实时数据区块。后续推理只能 `READ`（读取）该文件，严禁凭大模型记忆四舍五入或擅自修改！
 
 ### Step 1-12. 核心研究流程
 
@@ -255,42 +264,34 @@ opencli eastmoney announcement --symbol <股票代码> -f json
 
 ---
 
-## 第六章：工具与数据源
+## 第六章：工具与数据源（三级容灾架构）
 
-### 第一梯队：机构级数据管道（`opencli`，推荐）
+为防止单点接口故障或 API 参数变化导致的“幻觉式脑补”，本智能体强制采用多级数据获取梯队。严禁跨级降维！
 
-以下命令依赖 `opencli` 全局可用。若 `which opencli` 返回空，整节跳过，自动降级到第二梯队。
+### 第一梯队：内置 Python 量化网关 (`akshare`，绝对主力)
+
+**这是获取财务、量价、资金流的最高优级别。**
+通过 `scripts/fetch_market_data.py`，底层会自动在东财、新浪、腾讯等接口间抗跌落切换。
+调用方式：`python scripts/fetch_market_data.py <代码> <输出路径>`
+
+### 第二梯队：机构级命令行终端 (`opencli`，灵活备用)
+
+当 Python 脚本受限，或需要抓取雪球股民情绪、调用大模型进行交叉验证时，退而求其次使用 `opencli`。
+注意：语法必须使用位置参数（**不要用** `--symbol`）。
 
 | 命令 | 用途 | 典型调用 |
 |------|------|----------|
-| `opencli eastmoney quote` | A股/港股/美股实时行情 | `opencli eastmoney quote --symbol 000001` |
-| `opencli eastmoney kline` | K 线历史数据（分/日/周/月/前复权/后复权） | `opencli eastmoney kline --symbol 000001 --period day --count 250` |
-| `opencli eastmoney longhu` | 龙虎榜明细（交易所公开披露） | `opencli eastmoney longhu` |
-| `opencli eastmoney money-flow` | 主力资金净流入排行 | `opencli eastmoney money-flow --period today` |
-| `opencli eastmoney northbound` | 沪深港通北向/南向资金 | `opencli eastmoney northbound` |
-| `opencli eastmoney holders` | 十大流通股东（F10） | `opencli eastmoney holders --symbol 000001` |
-| `opencli eastmoney announcement` | 上市公司公告 | `opencli eastmoney announcement --symbol 000001` |
-| `opencli eastmoney sectors` | 行业/概念/地域板块排行 | `opencli eastmoney sectors --type 行业` |
-| `opencli eastmoney hot-rank` | 热股榜（需登录） | `opencli eastmoney hot-rank` |
-| `opencli xueqiu stock` | 雪球实时行情 | `opencli xueqiu stock --symbol SZ000001` |
-| `opencli xueqiu search` | 雪球股票搜索 | `opencli xueqiu search --keyword 宁德时代` |
-| `opencli xueqiu comments` | 个股讨论动态（判断市场情绪） | `opencli xueqiu comments --symbol SZ000001` |
-| `opencli xueqiu earnings-date` | 财报发布日期（公司大事） | `opencli xueqiu earnings-date --symbol SZ000001` |
-| `opencli deepseek ask` | 调度 DeepSeek 进行逻辑交叉验证 | `opencli deepseek ask "分析宁德时代的护城河是否正在收窄"` |
-| `opencli qwen ask` | 调度通义千问进行多模型交叉验证 | `opencli qwen ask "对以下看多逻辑进行逐条反驳：..."` |
+| `opencli eastmoney quote` | 实时行情 | `opencli eastmoney quote 000001` |
+| `opencli eastmoney kline` | K 线历史数据 | `opencli eastmoney kline 000001 --limit 250` |
+| `opencli eastmoney longhu` | 龙虎榜明细 | `opencli eastmoney longhu 000001` |
+| `opencli eastmoney holders` | 十大流通股东 | `opencli eastmoney holders 000001` |
+| `opencli xueqiu comments` | 个股讨论动态 | `opencli xueqiu comments 000001` |
+| `opencli deepseek ask` | 调度大模型验证 | `opencli deepseek ask "分析宁德时代的护城河"` |
 
-### 第二梯队：网页搜索兜底（`web_search` + `web_fetch`，始终可用）
+### 第三梯队：全网搜索引擎（`search_web`，底线兜底）
 
-当 `opencli` 不可用，或需要搜索 opencli 覆盖不到的长尾信息（政策文件、行业新闻、竞对动态）时使用。
-
-| 工具 | 用途 | 典型 query 模板 |
-|------|------|----------------|
-| `web_search` | 全网搜索 | `site:cninfo.com.cn <股票代码> 年报`、`site:eastmoney.com <公司名> 减持`、`<行业> 政策 2025`、`<公司名> 龙虎榜`、`<公司名> 机构调研` |
-| `web_fetch` | 抓取搜索结果中的具体页面全文 | 对 `web_search` 返回的高价值链接逐篇抓取正文 |
-
-### 降级规则
-
-1. **检测**：执行前先 `which opencli`。若返回空，判定为降级模式。
-2. **标注**：报告开头必须打印 `⚠️ 数据源降级：本报告基于公开网页搜索，未使用机构级数据管道（opencli 未安装）。`
-3. **可信度扣减**：降级模式下，最终可信度评级自动降 1 星（不低于 ★1）。
-4. **功能等价映射**：行情数据 → `web_search` "<股票代码> 实时股价"；龙虎榜 → `web_search` "<股票代码> 龙虎榜"；资金流向 → `web_search` "<股票代码> 主力资金"；多模型交叉验证 → 在报告中自行完成逻辑正反推敲，并注明「本环节未使用外部模型交叉验证」。
+仅在极端断网或所有 API 均遭封禁时才启用。
+> **降级规则与惩罚**：
+> 1. 一旦启用此梯队获取财务数字，报告开头必须打印红色警告：`⚠️ 严重数据降级：底层 API 全面阻断，本报告基于搜索引擎文本生成，极具幻觉风险`。
+> 2. 最终的置信度评级强制扣减 2 星（最高不超过 ★3）。
+> 3. 行情数据必须明确标注“存在延迟或滞后”。
