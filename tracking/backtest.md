@@ -6,7 +6,7 @@
 
 ## 一、每份报告必须登记的"快照" (Snapshot)
 
-在每份投研报告（或量化打分战报）交付时，**必须同时生成一条跟踪记录**，追加写入 `tracking/ledger.csv` 文件。
+在每份投研报告（或量化打分战报）交付时，**必须同时生成一条跟踪记录**，追加写入 `<当前工作区路径>/tracking/ledger.csv` 文件。
 
 ### CSV 字段定义
 
@@ -49,7 +49,7 @@
 
 ### 执行步骤（慢轨回测）
 
-1. **读取 `tracking/ledger.csv`**，筛选出"30日后股价"为空且距今已超过30天的记录。
+1. **读取 `<当前工作区路径>/tracking/ledger.csv`**，筛选出"30日后股价"为空且距今已超过30天的记录。
 2. **通过 `opencli eastmoney kline` 获取对应日期的历史收盘价**，填入30/60/90日字段。
    ```bash
    opencli eastmoney kline <股票代码> --period day --count 90 -f json

@@ -162,7 +162,8 @@ opencli eastmoney announcement --symbol <股票代码> -f json
 
 ### Step 14. 跟踪快照登记（分级强制执行）
 
-每份报告交付后，**必须将核心字段追加写入 `tracking/ledger.csv`**（见 `tracking/backtest.md`）。
+每份报告交付后，**必须将核心字段追加写入 `<当前工作区路径>/tracking/ledger.csv`**（参考说明见技能包内的 `tracking/backtest.md`）。
+- **严格动静分离 (State Decoupling) 铁律**：绝对禁止将用户的交易数据 `ledger.csv` 写入到 Skill 本身的配置目录（`~/.gemini/config/...`）中，污染技能代码。所有交易快照数据必须写在当前工作的生产资料根目录（即 `<当前工作区路径>/tracking/` 下）。
 - **不可豁免的必填字段**：报告日期、股票代码、报告时股价、评级、资金灯状态（Traffic_Light）。
 - **可豁免的量化字段**：详细 PE/评分等，若环境受限可跳过，但核心字段必须写入。此步骤是模型回测的数据基础，核心字段绝对禁止跳过。
 
