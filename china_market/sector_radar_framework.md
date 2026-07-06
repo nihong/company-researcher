@@ -12,7 +12,7 @@
 ```bash
 python scripts/scan_sector_rotation.py <输出目录路径>
 ```
-> 若无指定目录，可默认输出至当前工作区下的 `Market_Radars/` 文件夹。
+> 若无指定目录，可默认输出至当前工作区下的 `00_Market_Radars/Sector_Rotation/` 文件夹。
 
 ### Step 2. 读取扫描报告
 脚本执行完毕后，会生成 JSON 数据文件及初步排名的 Markdown 文件。智能体必须使用 `view_file` 工具读取生成的分析数据。

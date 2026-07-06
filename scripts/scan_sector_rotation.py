@@ -23,18 +23,24 @@ def fetch_with_fallback():
     try:
         print("    -> [Tier 1] 尝试抓取东方财富接口...")
         df = ak.stock_board_industry_spot_em()
-        if not df.empty:
+        if not df.empty and '板块名称' in df.columns:
             return df, "EastMoney"
+        else:
+            print("       [!] 东财接口返回数据格式异常 (可能触发了软拦截)")
     except Exception as e:
         print(f"       [!] 东财接口请求失败 ({e})")
         
     print("    -> [Tier 2] 尝试无缝切换至新浪财经接口...")
     try:
         df = ak.stock_sector_spot(indicator="新浪行业")
-        if not df.empty:
+        if not df.empty and '板块' in df.columns:
             df = df.rename(columns={'板块': '板块名称', '涨跌幅': '涨跌幅', '领涨股票名称': '领涨股票'})
+            if '领涨股票' not in df.columns:
+                df['领涨股票'] = "-"
             df['换手率'] = df['涨跌幅'].abs() * 0.8 
             return df, "Sina"
+        else:
+            print("       [!] 新浪接口返回数据格式异常")
     except Exception as e:
         print(f"       [!] 新浪接口降级失败: {e}")
         
