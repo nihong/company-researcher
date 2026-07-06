@@ -1,17 +1,27 @@
-#!/usr/bin/env python3
-import sys
 import json
 import os
-
-# 强制注入 NO_PROXY 免代理白名单，防止被全局科学上网环境劫持
-os.environ["NO_PROXY"] = "eastmoney.com,sina.com.cn,qq.com,10jqka.com.cn,localhost,127.0.0.1"
-os.environ["no_proxy"] = os.environ["NO_PROXY"]
+import datetime
+import urllib.request
+# 【终极防线】Monkey Patch：彻底阻断 macOS 底层 SystemConfiguration 代理读取
+# 在 Mac 环境下，requests 底层会绕过 os.environ 强制去读系统的全局网络代理配置。
+# 直接重写 getproxies，强行返回空字典，实现真正的无死角直连！
+urllib.request.getproxies = lambda: {}
+os.environ["no_proxy"] = "*"
+os.environ["NO_PROXY"] = "*"
 
 try:
     import akshare as ak
 except ImportError:
     print("Error: akshare is not installed. Please fallback to opencli.")
     sys.exit(1)
+
+import sys
+
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime.datetime, datetime.date)):
+            return obj.isoformat()
+        return super(DateEncoder, self).default(obj)
 
 if len(sys.argv) < 3:
     print("Usage: python fetch_market_data.py <stock_code> <output_dir>")
@@ -27,35 +37,58 @@ data_dict = {}
 
 # 1. 获取实时行情 (Spot) - 强制多源轮询容灾
 data_dict['quote'] = None
-# 轮询顺序：东方财富 -> 新浪 -> 腾讯
-sources = [
-    ("EastMoney", lambda: ak.stock_zh_a_spot_em()),
-    ("Sina", lambda: ak.stock_zh_a_spot()), # 视 akshare 版本而定，默认新浪接口
-]
-
-for source_name, fetch_func in sources:
+# 轮询顺序：东方财富 -> 新浪 -> 腾讯(通过日线拼凑)
+try:
+    print(f"[*] Fetching spot quote for {code_clean} via akshare (EastMoney API)...")
+    spot_df = ak.stock_zh_a_spot_em()
+    if '代码' in spot_df.columns:
+        row = spot_df[spot_df['代码'] == code_clean]
+    elif 'symbol' in spot_df.columns:
+        row = spot_df[spot_df['symbol'] == code_clean]
+    else:
+        row = spot_df.head(1)
+        
+    if not row.empty:
+        data_dict['quote'] = row.iloc[0].to_dict()
+        print("[+] Success with EastMoney")
+    else:
+        raise ValueError("EastMoney returned empty row.")
+except Exception as e:
+    print(f"[-] EastMoney Spot failed: {e}. Trying Sina...")
     try:
-        print(f"[*] Fetching spot quote for {code_clean} via akshare ({source_name} API)...")
-        spot_df = fetch_func()
-        # 不同接口返回的字段名可能不同，这里做基础判断
-        if '代码' in spot_df.columns:
-            row = spot_df[spot_df['代码'] == code_clean]
-        elif 'symbol' in spot_df.columns:
-            row = spot_df[spot_df['symbol'] == code_clean]
-        else:
-            row = spot_df.head(1) # fallback
-            
+        spot_df = ak.stock_zh_a_spot()
+        row = spot_df[spot_df['代码'] == code_clean] if '代码' in spot_df.columns else spot_df[spot_df['symbol'] == code_clean]
         if not row.empty:
             data_dict['quote'] = row.iloc[0].to_dict()
-            print(f"[+] Success with {source_name}")
-            break
+            print("[+] Success with Sina")
         else:
-            print(f"[-] {source_name} returned empty for {code_clean}.")
-    except Exception as e:
-        print(f"[!] {source_name} Spot error: {e}")
-
-if not data_dict['quote']:
-    data_dict['quote'] = {"error": "All akshare spot sources (EastMoney, Sina) failed due to network or proxy errors."}
+            raise ValueError("Sina Spot returned empty (Note: Sina Spot does not cover 688 STAR market).")
+    except Exception as e2:
+        print(f"[-] Sina Spot failed: {e2}. Trying Tencent (Fallback via Hist)...")
+        try:
+            # 腾讯接口需要加 sh/sz 前缀
+            prefix = "sh" if code_clean.startswith(('6')) else "sz"
+            tx_symbol = f"{prefix}{code_clean}"
+            tx_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
+            if not tx_df.empty:
+                last_row = tx_df.iloc[-1]
+                # 拼凑类似 quote 的基础结构
+                data_dict['quote'] = {
+                    "代码": code_clean,
+                    "名称": "N/A (Tencent Fallback)",
+                    "最新价": last_row['close'],
+                    "今开": last_row['open'],
+                    "最高": last_row['high'],
+                    "最低": last_row['low'],
+                    "成交量": last_row['amount'],
+                    "_fallback_source": "Tencent_Hist"
+                }
+                print("[+] Success with Tencent (Fallback)")
+            else:
+                raise ValueError("Tencent Hist returned empty.")
+        except Exception as e3:
+            print(f"[!] All spot fallbacks failed. Last error: {e3}")
+            data_dict['quote'] = {"error": "All akshare spot sources (EastMoney, Sina, Tencent) failed."}
 
 # 2. 获取日 K 线 (Daily K-line, 提取最近 20 天)
 try:
@@ -63,9 +96,23 @@ try:
     hist_df = ak.stock_zh_a_hist(symbol=code_clean, period="daily", adjust="qfq")
     if not hist_df.empty:
         data_dict['kline'] = hist_df.tail(20).to_dict(orient='records')
+        print("[+] Success with EastMoney K-line")
+    else:
+        raise ValueError("EastMoney K-line returned empty.")
 except Exception as e:
-    print(f"[!] K-line error: {e}")
-    data_dict['kline'] = {"error": str(e)}
+    print(f"[-] EastMoney K-line failed: {e}. Trying Tencent...")
+    try:
+        prefix = "sh" if code_clean.startswith(('6')) else "sz"
+        tx_symbol = f"{prefix}{code_clean}"
+        hist_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
+        if not hist_df.empty:
+            data_dict['kline'] = hist_df.tail(20).to_dict(orient='records')
+            print("[+] Success with Tencent K-line")
+        else:
+            raise ValueError("Tencent K-line returned empty.")
+    except Exception as e2:
+        print(f"[!] K-line error: {e2}")
+        data_dict['kline'] = {"error": str(e2)}
 
 # 3. 获取资金流向 (Money Flow - 新浪财经)
 try:
@@ -80,6 +127,6 @@ except Exception as e:
 # 保存结构化 JSON
 out_file = os.path.join(output_dir, "raw_market_data.json")
 with open(out_file, 'w', encoding='utf-8') as f:
-    json.dump(data_dict, f, ensure_ascii=False, indent=2)
+    json.dump(data_dict, f, ensure_ascii=False, indent=2, cls=DateEncoder)
 
 print(f"[+] Success! Market data reliably fetched via akshare and saved to: {out_file}")
