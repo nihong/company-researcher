@@ -43,3 +43,17 @@ python scripts/scan_hyper_growth.py --support_ma 20 <输出目录路径>
 > 判定标准：有效跌破 60 日牛熊分界线，且呈现放量下跌趋势（主力出逃）。
 1. **[概念名称]**：放量跌破支撑线，短期情绪崩塌，等待右侧企稳。
 ```
+
+## 四、 物理归档与台账记录 (Archiving & Ledger)
+报告生成后，智能体必须强制执行以下两次归档动作，以支持未来的量化回测：
+
+1. **研报物理归档**：
+   * 将 Markdown 报告保存至：`Company_Research_Reports/00_Market_Radars/Hyper_Growth/YYYYMMDD_宏观天气_十倍股雷达.md`
+2. **回测台账写入**：
+   * 将核心结果追加写入技能库下的 `tracking/radar_ledger.csv` 文件中，字段按顺序包括：
+     * `Date`: 当前日期 (如 2026-07-06)
+     * `Radar_Type`: `Hyper_Growth`
+     * `Macro_Weather`: 当前宏观天气（如果未调用天气则填 `未知`）
+     * `Top_Long_Sectors`: 用 `|` 分隔的 2-3 个已跌入黄金坑的白名单概念
+     * `Top_Short_Sectors`: 用 `|` 分隔的已破位危险白名单概念
+     * `Report_Path`: 相对文件路径 (如 `00_Market_Radars/Hyper_Growth/...`)

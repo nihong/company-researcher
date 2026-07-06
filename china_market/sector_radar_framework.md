@@ -46,3 +46,17 @@ python scripts/scan_sector_rotation.py <输出目录路径>
 
 ## 四、 后续联动 (Auto-Linking)
 在输出完雷达报告后，智能体应主动询问用户：“**是否需要我为您针对上述某个优质板块中的龙头股，切换至【个股深度调研模式】？**”
+
+## 四、 物理归档与台账记录 (Archiving & Ledger)
+报告生成后，智能体必须强制执行以下两次归档动作，以支持未来的量化回测：
+
+1. **研报物理归档**：
+   * 将 Markdown 报告保存至：`Company_Research_Reports/00_Market_Radars/Sector_Rotation/YYYYMMDD_宏观天气_全市场动能雷达.md`
+2. **回测台账写入**：
+   * 将核心结果追加写入技能库下的 `tracking/radar_ledger.csv` 文件中，字段按顺序包括：
+     * `Date`: 当前日期 (如 2026-07-06)
+     * `Radar_Type`: `Sector_Rotation`
+     * `Macro_Weather`: 当前宏观天气（如果未调用天气则填 `未知`）
+     * `Top_Long_Sectors`: 用 `|` 分隔的 2-3 个最推荐左侧板块
+     * `Top_Short_Sectors`: 用 `|` 分隔的严重拥挤预警板块
+     * `Report_Path`: 相对文件路径 (如 `00_Market_Radars/Sector_Rotation/...`)
