@@ -90,15 +90,19 @@ graph TD
 ```text
 【1】代码与规则库 (Skill Repository)
 📍 存放路径: ~/.gemini/config/skills/company-researcher/
-├── SKILL.md                  # 🌟 主干宪法：Router 总闸与个股 17 步 SOP
+├── SKILL.md                  # 🌟 主干宪法：Router 总闸与任务分发
 ├── README.md                 # 📖 备忘录：本文档说明书
+├── agents/                   # 🧠 智能体人设池 (如红队审查、量化打分)
+├── workflows/                # ⚙️ 核心流水线编排 (如 individual_research_sop.md)
+├── frameworks/               # 📚 统一理论知识库
+│   ├── china_market/         # 🇨🇳 A股理论 (宏观天气、轮动雷达、红队规则等)
+│   └── hk_market/            # 🇭🇰 港股理论
+├── specs/                    # 📏 数据规范与骨架层
+│   ├── report_template.md    # 买方研报填空防呆模板
+│   ├── dashboard_rules.md    # 看板渲染规则
+│   └── ledger_format.md      # 回测台账数据规范
 ├── config/
 │   └── hyper_growth_concepts.json # 🗂️ 十倍股星辰大海白名单 (可自由配置)
-├── china_market/
-│   ├── macro_weather_framework.md # 📡 宏观气象台：根据 PMI 等测算天气并干预仓位
-│   ├── sector_radar_framework.md  # 🚁 板块雷达：86 个行业全景拥挤度判定规则
-│   ├── hyper_growth_framework.md  # 🚀 星辰大海：缩量龙回头与黄金坑判定规则
-│   └── red_team_framework.md      # ⚔️ 攻击框架：中国市场专属的做空/避雷逻辑
 └── scripts/                  
     ├── fetch_advanced_context.py  # 🚀 宏观网关：基于 akshare 抓取 PMI、快讯、竞对
     ├── scan_sector_rotation.py    # 🚁 扫描引擎：遍历东财行业 Spot 捕捉轮动
