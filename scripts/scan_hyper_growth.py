@@ -41,12 +41,23 @@ broken = []
 # Fetch Data for Whitelist Concepts Only
 for concept in whitelist:
     print(f"  -> 正在侦测: {concept}...")
-    try:
-        # 尝试获取板块历史K线 (带网络重试机制可以后续添加)
-        # Note: AKShare endpoints sometimes have instability due to proxies.
-        df = ak.stock_board_concept_hist_em(symbol=concept, adjust="qfq")
-        if df.empty or len(df) < ma_window:
-            continue
+    df = pd.DataFrame()
+    
+    # Tier 1 & Retry
+    for i in range(3):
+        try:
+            df = ak.stock_board_concept_hist_em(symbol=concept, adjust="qfq")
+            if not df.empty:
+                break
+        except Exception as e:
+            print(f"     [!] 东财历史K线请求失败 ({e}), 降速休眠 {2*(i+1)}s...")
+            time.sleep(2 * (i + 1))
+            
+    # Tier 2 (Sina or THS Fallback could be placed here if supported, but for concepts EM is most reliable)
+    # If df is still empty after retries, skip
+    if df.empty or len(df) < ma_window:
+        print(f"     [!] 无法获取 {concept} 的足够K线数据, 跳过。")
+        continue
         
         df = df.tail(60).copy() # 取最近60个交易日
         df['收盘'] = pd.to_numeric(df['收盘'], errors='coerce')
@@ -92,10 +103,6 @@ for concept in whitelist:
                 "ma": latest_ma
             })
             
-    except Exception as e:
-        print(f"     [!] 抓取 {concept} 失败: {e}")
-        # 遇到网络错误，静默跳过，保证整个脚本跑完
-        continue
 
 # Save Results
 results = {
