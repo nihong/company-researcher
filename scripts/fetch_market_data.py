@@ -3,6 +3,10 @@ import sys
 import json
 import os
 
+# 强制注入 NO_PROXY 免代理白名单，防止被全局科学上网环境劫持
+os.environ["NO_PROXY"] = "eastmoney.com,sina.com.cn,qq.com,10jqka.com.cn,localhost,127.0.0.1"
+os.environ["no_proxy"] = os.environ["NO_PROXY"]
+
 try:
     import akshare as ak
 except ImportError:
@@ -21,18 +25,37 @@ os.makedirs(output_dir, exist_ok=True)
 
 data_dict = {}
 
-# 1. 获取实时行情 (Spot)
-try:
-    print(f"[*] Fetching spot quote for {code_clean} via akshare (EastMoney API)...")
-    spot_df = ak.stock_zh_a_spot_em()
-    row = spot_df[spot_df['代码'] == code_clean]
-    if not row.empty:
-        data_dict['quote'] = row.iloc[0].to_dict()
-    else:
-        data_dict['quote'] = {"error": "Stock code not found in spot data."}
-except Exception as e:
-    print(f"[!] Spot error: {e}")
-    data_dict['quote'] = {"error": str(e)}
+# 1. 获取实时行情 (Spot) - 强制多源轮询容灾
+data_dict['quote'] = None
+# 轮询顺序：东方财富 -> 新浪 -> 腾讯
+sources = [
+    ("EastMoney", lambda: ak.stock_zh_a_spot_em()),
+    ("Sina", lambda: ak.stock_zh_a_spot()), # 视 akshare 版本而定，默认新浪接口
+]
+
+for source_name, fetch_func in sources:
+    try:
+        print(f"[*] Fetching spot quote for {code_clean} via akshare ({source_name} API)...")
+        spot_df = fetch_func()
+        # 不同接口返回的字段名可能不同，这里做基础判断
+        if '代码' in spot_df.columns:
+            row = spot_df[spot_df['代码'] == code_clean]
+        elif 'symbol' in spot_df.columns:
+            row = spot_df[spot_df['symbol'] == code_clean]
+        else:
+            row = spot_df.head(1) # fallback
+            
+        if not row.empty:
+            data_dict['quote'] = row.iloc[0].to_dict()
+            print(f"[+] Success with {source_name}")
+            break
+        else:
+            print(f"[-] {source_name} returned empty for {code_clean}.")
+    except Exception as e:
+        print(f"[!] {source_name} Spot error: {e}")
+
+if not data_dict['quote']:
+    data_dict['quote'] = {"error": "All akshare spot sources (EastMoney, Sina) failed due to network or proxy errors."}
 
 # 2. 获取日 K 线 (Daily K-line, 提取最近 20 天)
 try:
