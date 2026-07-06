@@ -64,31 +64,70 @@ except Exception as e:
         else:
             raise ValueError("Sina Spot returned empty (Note: Sina Spot does not cover 688 STAR market).")
     except Exception as e2:
-        print(f"[-] Sina Spot failed: {e2}. Trying Tencent (Fallback via Hist)...")
+        print(f"[-] Sina Spot failed: {e2}. Trying Baostock (Quantitative Fallback)...")
         try:
-            # 腾讯接口需要加 sh/sz 前缀
-            prefix = "sh" if code_clean.startswith(('6')) else "sz"
-            tx_symbol = f"{prefix}{code_clean}"
-            tx_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
-            if not tx_df.empty:
-                last_row = tx_df.iloc[-1]
-                # 拼凑类似 quote 的基础结构
+            import baostock as bs
+            import pandas as pd
+            import datetime
+            bs.login()
+            prefix = "sh." if code_clean.startswith(('6')) else "sz."
+            bs_symbol = f"{prefix}{code_clean}"
+            
+            # Fetch latest daily data
+            rs = bs.query_history_k_data_plus(bs_symbol,
+                "date,code,open,high,low,close,volume,amount,turn,peTTM,pbMRQ",
+                start_date=(datetime.datetime.now() - datetime.timedelta(days=10)).strftime('%Y-%m-%d'),
+                frequency="d", adjustflag="3")
+            data_list = []
+            while (rs.error_code == '0') & rs.next():
+                data_list.append(rs.get_row_data())
+            bs.logout()
+            
+            if data_list:
+                bs_df = pd.DataFrame(data_list, columns=rs.fields)
+                last_row = bs_df.iloc[-1]
                 data_dict['quote'] = {
                     "代码": code_clean,
-                    "名称": "N/A (Tencent Fallback)",
-                    "最新价": last_row['close'],
-                    "今开": last_row['open'],
-                    "最高": last_row['high'],
-                    "最低": last_row['low'],
-                    "成交量": last_row['amount'],
-                    "_fallback_source": "Tencent_Hist"
+                    "名称": "N/A (Baostock Fallback)",
+                    "最新价": float(last_row['close']),
+                    "今开": float(last_row['open']),
+                    "最高": float(last_row['high']),
+                    "最低": float(last_row['low']),
+                    "成交量": float(last_row['volume']),
+                    "成交额": float(last_row['amount']),
+                    "换手率": float(last_row['turn']),
+                    "市盈率-动态": float(last_row['peTTM']),
+                    "市净率": float(last_row['pbMRQ']),
+                    "_fallback_source": "Baostock"
                 }
-                print("[+] Success with Tencent (Fallback)")
+                print("[+] Success with Baostock (Fallback)")
             else:
-                raise ValueError("Tencent Hist returned empty.")
+                raise ValueError("Baostock returned empty.")
         except Exception as e3:
-            print(f"[!] All spot fallbacks failed. Last error: {e3}")
-            data_dict['quote'] = {"error": "All akshare spot sources (EastMoney, Sina, Tencent) failed."}
+            print(f"[-] Baostock failed: {e3}. Trying Tencent (Basic Fallback via Hist)...")
+            try:
+                # 腾讯接口需要加 sh/sz 前缀
+                prefix = "sh" if code_clean.startswith(('6')) else "sz"
+                tx_symbol = f"{prefix}{code_clean}"
+                tx_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
+                if not tx_df.empty:
+                    last_row = tx_df.iloc[-1]
+                    data_dict['quote'] = {
+                        "代码": code_clean,
+                        "名称": "N/A (Tencent Fallback)",
+                        "最新价": last_row['close'],
+                        "今开": last_row['open'],
+                        "最高": last_row['high'],
+                        "最低": last_row['low'],
+                        "成交量": last_row['amount'],
+                        "_fallback_source": "Tencent_Hist"
+                    }
+                    print("[+] Success with Tencent (Fallback)")
+                else:
+                    raise ValueError("Tencent Hist returned empty.")
+            except Exception as e4:
+                print(f"[!] All spot fallbacks failed. Last error: {e4}")
+                data_dict['quote'] = {"error": "All spot sources failed."}
 
 # 2. 获取日 K 线 (Daily K-line, 提取最近 20 天)
 try:
