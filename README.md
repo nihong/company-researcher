@@ -88,7 +88,8 @@ graph TD
 ## 📂 架构地图与自定义优化指南 (v4.3)
 
 ```text
-company-researcher/
+【1】代码与规则库 (Skill Repository)
+📍 存放路径: ~/.gemini/config/skills/company-researcher/
 ├── SKILL.md                  # 🌟 主干宪法：Router 总闸与个股 17 步 SOP
 ├── README.md                 # 📖 备忘录：本文档说明书
 ├── config/
@@ -98,14 +99,23 @@ company-researcher/
 │   ├── sector_radar_framework.md  # 🚁 板块雷达：86 个行业全景拥挤度判定规则
 │   ├── hyper_growth_framework.md  # 🚀 星辰大海：缩量龙回头与黄金坑判定规则
 │   └── red_team_framework.md      # ⚔️ 攻击框架：中国市场专属的做空/避雷逻辑
-├── scripts/                  
-│   ├── fetch_advanced_context.py  # 🚀 宏观网关：基于 akshare 抓取 PMI、快讯、竞对
-│   ├── scan_sector_rotation.py    # 🚁 扫描引擎：遍历东财行业 Spot 捕捉轮动
-│   ├── scan_hyper_growth.py       # 🚀 爆破引擎：白名单定向扫描，支持 --support_ma 传参
-│   ├── fetch_market_data.py       # 🚀 个股网关：抓取 K 线、资金流等基础事实源
-│   └── render_dashboard.py        # 📊 渲染引擎：一键生成全自动个股研报看板
-└── tracking/
-    └── ledger.csv            # 📊 追踪回测：个股台账
+└── scripts/                  
+    ├── fetch_advanced_context.py  # 🚀 宏观网关：基于 akshare 抓取 PMI、快讯、竞对
+    ├── scan_sector_rotation.py    # 🚁 扫描引擎：遍历东财行业 Spot 捕捉轮动
+    ├── scan_hyper_growth.py       # 🚀 爆破引擎：白名单定向扫描，支持 --support_ma 传参
+    ├── fetch_market_data.py       # 🚀 个股网关：抓取 K 线、资金流等基础事实源
+    └── render_dashboard.py        # 📊 渲染引擎：一键生成全自动极客看板
+
+【2】实体回测与研报库 (Workspace Repository)
+📍 存放路径: ~/Documents/Github/Company_Research_Reports/
+├── README.md                 # 🖥️ 极客看板主页：由 render_dashboard.py 全自动渲染
+├── tracking/
+│   ├── ledger.csv            # 📊 个股回测台账：记录所有个股的多空打分与评级
+│   └── radar_ledger.csv      # 📊 宏观雷达台账：记录每日抓取的高潮预警与黄金坑板块
+├── 00_Market_Radars/
+│   ├── Sector_Rotation/      # 🚁 存放每日生成的《全市场动能雷达报告》
+│   └── Hyper_Growth/         # 🚀 存放每日生成的《十倍股黄金坑雷达报告》
+└── <各大细分行业目录>/         # ⚖️ 存放生成的个股深度研报 (例如: 汽车整车/002594_比亚迪.md)
 ```
 
 ## 📜 License
