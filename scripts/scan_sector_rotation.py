@@ -19,33 +19,42 @@ output_dir = sys.argv[1]
 os.makedirs(output_dir, exist_ok=True)
 
 print("[*] 正在拉取全市场板块实时概况...")
-def fetch_with_retry():
-    max_retries = 3
-    # Tier 1: EastMoney
-    for i in range(max_retries):
-        try:
-            print(f"  -> [Tier 1] 尝试抓取东方财富接口 (第 {i+1} 次)...")
-            df = ak.stock_board_industry_spot_em()
+def fetch_with_fallback():
+    try:
+        print("    -> [Tier 1] 尝试抓取东方财富接口...")
+        df = ak.stock_board_industry_spot_em()
+        if not df.empty:
             return df, "EastMoney"
-        except Exception as e:
-            print(f"     [!] 东财接口请求失败, 触发防爬虫降速 ({e})")
-            time.sleep(2 * (i + 1)) # 指数退避降速
-            
-    # Tier 2: Sina Fallback
-    print("  -> [Tier 2] 东方财富完全熔断！尝试降级切换至新浪财经接口...")
+    except Exception as e:
+        print(f"       [!] 东财接口请求失败 ({e})")
+        
+    print("    -> [Tier 2] 尝试无缝切换至新浪财经接口...")
     try:
         df = ak.stock_sector_spot(indicator="新浪行业")
-        # 适配新浪列名到东财格式
-        df = df.rename(columns={'板块': '板块名称', '涨跌幅': '涨跌幅', '领涨股票名称': '领涨股票'})
-        # 新浪接口无换手率，采用涨跌幅绝对值的衍生指标作为短期拥挤度/波动率代理
-        df['换手率'] = df['涨跌幅'].abs() * 0.8 
-        return df, "Sina"
+        if not df.empty:
+            df = df.rename(columns={'板块': '板块名称', '涨跌幅': '涨跌幅', '领涨股票名称': '领涨股票'})
+            df['换手率'] = df['涨跌幅'].abs() * 0.8 
+            return df, "Sina"
     except Exception as e:
-        print(f"     [!] 新浪接口降级失败: {e}")
+        print(f"       [!] 新浪接口降级失败: {e}")
         
     return None, None
 
-spot_df, source = fetch_with_retry()
+def fetch_with_retry_and_fallback():
+    max_retries = 3
+    for i in range(max_retries):
+        if i > 0:
+            print(f"  => 所有数据源均熔断，触发防爬虫降速休眠 {2*i}s (第 {i} 次重试)...")
+            time.sleep(2 * i)
+            
+        print(f"  -> 第 {i+1} 次全源轮询:")
+        df, source = fetch_with_fallback()
+        if df is not None:
+            return df, source
+            
+    return None, None
+
+spot_df, source = fetch_with_retry_and_fallback()
 if spot_df is None:
     print("Error: 所有数据源(Tier 1 & Tier 2)均被封锁，请稍后再试或更换代理。")
     sys.exit(1)

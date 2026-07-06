@@ -43,18 +43,39 @@ for concept in whitelist:
     print(f"  -> 正在侦测: {concept}...")
     df = pd.DataFrame()
     
-    # Tier 1 & Retry
-    for i in range(3):
+    def fetch_concept_with_fallback(c):
         try:
-            df = ak.stock_board_concept_hist_em(symbol=concept, adjust="qfq")
-            if not df.empty:
-                break
+            print(f"    -> [Tier 1] 尝试抓取东方财富接口...")
+            res = ak.stock_board_concept_hist_em(symbol=c, adjust="qfq")
+            if not res.empty:
+                return res
         except Exception as e:
-            print(f"     [!] 东财历史K线请求失败 ({e}), 降速休眠 {2*(i+1)}s...")
-            time.sleep(2 * (i + 1))
+            print(f"       [!] 东财历史K线请求失败 ({e})")
             
-    # Tier 2 (Sina or THS Fallback could be placed here if supported, but for concepts EM is most reliable)
-    # If df is still empty after retries, skip
+        print(f"    -> [Tier 2] 尝试无缝切换至同花顺概念接口...")
+        try:
+            # 同花顺的列名和东财类似，直接取用。注意同花顺年份传参要求
+            res = ak.stock_board_concept_hist_ths(symbol=c, start_year="2020")
+            if not res.empty:
+                # 同花顺列名统一规范为: 日期, 开盘, 最高, 最低, 收盘, 成交量, 成交额
+                res = res.rename(columns={'日期': '日期', '收盘价': '收盘', '成交额': '成交额'})
+                return res
+        except Exception as e:
+            print(f"       [!] 同花顺概念接口降级失败 ({e})")
+            
+        return pd.DataFrame()
+
+    max_retries = 3
+    for i in range(max_retries):
+        if i > 0:
+            print(f"  => 所有概念数据源均熔断，触发防爬虫降速休眠 {2*i}s (第 {i} 次重试)...")
+            time.sleep(2 * i)
+            
+        print(f"  -> 第 {i+1} 次全源轮询侦测: {concept}")
+        df = fetch_concept_with_fallback(concept)
+        if not df.empty:
+            break
+            
     if df.empty or len(df) < ma_window:
         print(f"     [!] 无法获取 {concept} 的足够K线数据, 跳过。")
         continue
