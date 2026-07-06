@@ -50,7 +50,7 @@ python scripts/scan_hyper_growth.py --support_ma 20 <输出目录路径>
 1. **研报物理归档**：
    * 将 Markdown 报告保存至：`Company_Research_Reports/00_Market_Radars/Hyper_Growth/YYYYMMDD_宏观天气_十倍股雷达.md`
 2. **回测台账写入**：
-   * 将核心结果追加写入技能库下的 `tracking/radar_ledger.csv` 文件中，字段按顺序包括：
+   * 将核心结果追加写入当前工作区下的 `tracking/radar_ledger.csv` 文件中，字段按顺序包括：
      * `Date`: 当前日期 (如 2026-07-06)
      * `Radar_Type`: `Hyper_Growth`
      * `Macro_Weather`: 当前宏观天气（如果未调用天气则填 `未知`）
