@@ -27,7 +27,7 @@
 
 ## 第四阶段：Writer & DevOps Agent (渲染与归档)
 1. **套用强制模板 (Writer)**：
-   - 必须严格遵循 `china_market/report_template.md` 格式生成正文。
+   - 必须严格遵循 `templates/report_template.md` 格式生成正文。
    - 在正文顶部植入 `ledger.json` 代码块。
    - 使用 `<metric id="json里的key">31.8</metric>` 包裹所有核心数据。
 2. **外部程序强校验 (Firewall)**：
