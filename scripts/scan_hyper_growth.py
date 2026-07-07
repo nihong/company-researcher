@@ -80,49 +80,49 @@ for concept in whitelist:
         print(f"     [!] 无法获取 {concept} 的足够K线数据, 跳过。")
         continue
         
-        df = df.tail(60).copy() # 取最近60个交易日
-        df['收盘'] = pd.to_numeric(df['收盘'], errors='coerce')
-        df['成交额'] = pd.to_numeric(df['成交额'], errors='coerce')
-        
-        # 计算均线
-        ma_col = f'MA{ma_window}'
-        df[ma_col] = df['收盘'].rolling(window=ma_window).mean()
-        
-        latest = df.iloc[-1]
-        latest_close = latest['收盘']
-        latest_ma = latest[ma_col]
-        latest_vol = latest['成交额']
-        
-        # 找前高成交额 (过去10天内的高点)
-        recent_10 = df.tail(10)
-        peak_vol = recent_10['成交额'].max()
-        
-        # 判定逻辑：
-        # 1. 破位危险区：收盘价跌破 MA60 且跌破 MA20 超过 3%
-        if latest_close < latest_ma * 0.97:
-            broken.append({
-                "concept": concept,
-                "status": f"跌破 {ma_window} 日线",
-                "close": latest_close,
-                "ma": latest_ma
-            })
-        # 2. 黄金坑触发区：缩量回踩 (距离 MA 偏差在 1.5% 以内，且成交量萎缩至前高的 60% 以下)
-        elif abs(latest_close - latest_ma) / latest_ma < 0.015 and latest_vol < peak_vol * 0.6:
-            golden_pits.append({
-                "concept": concept,
-                "status": f"精准回踩 {ma_window} 日线",
-                "vol_shrinkage": f"{int((latest_vol/peak_vol)*100)}%",
-                "close": latest_close,
-                "ma": latest_ma
-            })
-        # 3. 趋势震荡区
-        else:
-            oscillating.append({
-                "concept": concept,
-                "status": "趋势内震荡",
-                "close": latest_close,
-                "ma": latest_ma
-            })
+    df = df.tail(60).copy() # 取最近60个交易日
+    df['收盘'] = pd.to_numeric(df['收盘'], errors='coerce')
+    df['成交额'] = pd.to_numeric(df['成交额'], errors='coerce')
+    
+    # 计算均线
+    ma_col = f'MA{ma_window}'
+    df[ma_col] = df['收盘'].rolling(window=ma_window).mean()
+    
+    latest = df.iloc[-1]
+    latest_close = latest['收盘']
+    latest_ma = latest[ma_col]
+    latest_vol = latest['成交额']
+    
+    # 找前高成交额 (过去10天内的高点)
+    recent_10 = df.tail(10)
+    peak_vol = recent_10['成交额'].max()
+    
+    # 判定逻辑：
+    # 1. 破位危险区：收盘价跌破 MA60 且跌破 MA20 超过 3%
+    if latest_close < latest_ma * 0.97:
+        broken.append({
+            "concept": concept,
+            "status": f"跌破 {ma_window} 日线",
+            "close": latest_close,
+            "ma": latest_ma
+        })
+    # 2. 黄金坑触发区：缩量回踩 (距离 MA 偏差在 1.5% 以内，且成交量萎缩至前高的 60% 以下)
+    elif abs(latest_close - latest_ma) / latest_ma < 0.015 and latest_vol < peak_vol * 0.6:
+        golden_pits.append({
+            "concept": concept,
+            "status": f"精准回踩 {ma_window} 日线",
+            "vol_shrinkage": f"{int((latest_vol/peak_vol)*100)}%",
+            "close": latest_close,
+            "ma": latest_ma
+        })
+    # 3. 趋势震荡区
+    else:
+        oscillating.append({
+            "concept": concept,
+            "status": "趋势内震荡",
+            "close": latest_close,
+            "ma": latest_ma
+        })
             
 
 # Save Results

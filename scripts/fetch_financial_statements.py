@@ -51,10 +51,21 @@ try:
     except Exception as e:
         print(f"[-] Sina API failed: {e}")
         # 2. 回退到东方财富业绩报表 (获取最新日期的)
-        df_em = ak.stock_yjbb_em(date="20231231")
+        current_year = datetime.datetime.now().year
+        # 尝试当年一季报或去年年报
+        fallback_date = f"{current_year}0331"
+        try:
+            df_em = ak.stock_yjbb_em(date=fallback_date)
+        except Exception:
+            fallback_date = f"{current_year - 1}1231"
+            df_em = ak.stock_yjbb_em(date=fallback_date)
+            
         row = df_em[df_em['股票代码'] == code_clean]
         if not row.empty:
-            data_dict["financial_abstract"] = row.to_dict(orient='records')
+            record = row.to_dict(orient='records')[0]
+            record['report_date'] = fallback_date
+            record['cash_flow_warning'] = "⚠️ 东财业绩报表无现金流数据，请量化打分模块跳过现金流校验，避免盲猜。"
+            data_dict["financial_abstract"] = [record]
             print("[+] Success fetched EastMoney YJBB.")
         else:
             raise ValueError("Empty data from EM")

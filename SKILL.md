@@ -135,7 +135,9 @@ run_as: subagent
 
 | 智能体代号 (TypeName) | 文件定义路径 | 用途与分工 |
 |----------------------|-------------|-----------|
-| `red_team_reviewer` | `agents/Red_Team_Review_Agent.md` | **红军极限施压**：对主 Agent 的看多逻辑进行最严厉的证伪攻击。 |
+| `A_Share_Quant_Scorer` | 在决策末期调用，负责根据 `financial_statements.json` 和 `raw_market_data.json` 给标的进行机器打分。 |
+| `Judge_Agent` | 在第三阶段调用，扮演绝对中立的仲裁法庭，对主分析师与红队的辩论进行三局两胜的打分，解决双方僵局并最终定调风险级别。 |
+| `Red_Team_Review_Agent`| （已被重构融入标准 SOP，通常不需要你手动显式调用，SOP 会指引你扮演或调用）| **红军极限施压**：对主 Agent 的看多逻辑进行最严厉的证伪攻击。 |
 | `quant_scorer` | `agents/A_Share_Quant_Scorer.md` | **量价多模态交叉评分**：接管最终评级定档，将计算结果写入台账。 |
 | `sentiment_analyzer` | `agents/Sentiment_Analyzer.md` | **股吧散户情绪提取**：原生读取网络舆情并总结散户情绪，取代 opencli 的脆皮爬虫。 |
 
