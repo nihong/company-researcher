@@ -2,3 +2,10 @@
 .reasonix/
 node_modules/
 *.log
+
+# Temporary cache
+.cache/
+.tmp/
+# macOS
+.DS_Store
+

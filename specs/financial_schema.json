@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Financial Statements Schema",
+  "description": "强制大模型与 Python 爬虫之间进行对齐的财务数据契约模板",
+  "type": "object",
+  "properties": {
+    "financial_abstract": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "股票代码": {"type": "string"},
+          "股票简称": {"type": "string"},
+          "营业总收入-营业总收入": {"type": ["number", "null"]},
+          "营业总收入-同比增长": {"type": ["number", "null"]},
+          "净利润-净利润": {"type": ["number", "null"]},
+          "净利润-同比增长": {"type": ["number", "null"]},
+          "每股经营现金流量": {"type": ["number", "null"]},
+          "净资产收益率": {"type": ["number", "null"]},
+          "OCF": {"type": ["number", "string", "null"]},
+          "CAPEX": {"type": ["number", "string", "null"]},
+          "Total_Assets": {"type": ["number", "string", "null"]},
+          "Total_Liabilities": {"type": ["number", "string", "null"]}
+        },
+        "required": ["股票代码", "净利润-净利润", "每股经营现金流量"]
+      }
+    }
+  }
+}

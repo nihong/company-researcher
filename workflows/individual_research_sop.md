@@ -6,7 +6,7 @@
 ## 第一阶段：Data Agent (底层事实源收集)
 1. **获取宏观天气预报**：调用 `python scripts/fetch_advanced_context.py <股票代码> <当前工作区>` 或读取大盘雷达 json，获取大盘情绪。
 2. **严防幻觉的数据采集机制**：
-   - 必须优先且**仅使用** `python scripts/fetch_market_data.py` 和 `python scripts/fetch_financial_statements.py` 获取财务与量价数据（其内部已包含多源轮询）。
+   - 必须优先且**仅使用** `python scripts/fetch_market_data.py <股票代码> .cache/` 和 `python scripts/fetch_financial_statements.py <股票代码> .cache/` 获取财务与量价数据（强制输出到 `.cache/` 隐藏目录以保持环境绝对整洁）。
    - **财务降级红线**：若该脚本因全局断网等极端情况导致彻底获取不到财务数据，**绝对禁止**擅自使用大模型或 `search_web` 去网页上“盲搜”财务数字（极易产生错乱幻觉）。
    - 若命中红线，必须在最终报告开头打印红色警告 `⚠️ 严重降级：量化数据链路全损`，并在后续步骤中对估值项留白，仅做定性分析。
 5. **舆情与散户情绪提取**：
@@ -41,7 +41,7 @@
    - 在终端执行 `python scripts/validate_report.py <报告文件> <ledger.json>`。
    - 必须看到 `[Firewall Pass]`，否则打回重写。
 3. **环境深度清理 (Hygiene)**：
-   - **执行强删令**：`rm -f raw_market_data.json advanced_context.json` 等所有中间废料，当前目录**只允许**存活 `ledger.json` 和最终的 `.md` 研报。
+   - **执行强删令**：直接清空 `.cache/` 缓存目录下的所有临时 JSON 废料 (`rm -rf .cache/*`)，当前工作区**只允许**存活 `ledger.json` 和最终排版好的 `.md` 研报，严禁垃圾文件外溢。
 4. **量化台账登记与极客看板渲染**：
    - 调用 `invoke_subagent` 唤醒 `quant_scorer` (量化裁判) 智能体进行多模态算分。
    - 遵守格式追加写入 `<当前工作区路径>/tracking/ledger.csv`。
