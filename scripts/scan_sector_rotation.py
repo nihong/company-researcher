@@ -77,6 +77,7 @@ spot_df = spot_df.dropna(subset=['板块名称', '涨跌幅'])
 
 spot_df['涨跌幅'] = pd.to_numeric(spot_df['涨跌幅'], errors='coerce')
 spot_df['换手率'] = pd.to_numeric(spot_df['换手率'], errors='coerce')
+spot_df['换手率'] = spot_df['换手率'].fillna(0)
 
 # 排序并提取三种状态
 # 1. 刚启动 (左侧/温和右侧): 涨幅处于 1% ~ 3%，换手率适中 (1% ~ 3%)，说明温和放量上涨。

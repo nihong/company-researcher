@@ -40,7 +40,7 @@
    - 在终端执行 `python scripts/validate_report.py <报告文件> <ledger.json>`。
    - 必须看到 `[Firewall Pass]`，否则打回重写。
 3. **环境深度清理 (Hygiene)**：
-   - **执行强删令**：`rm -f quote.json kline.json holders.json` 等所有中间废料，当前目录**只允许**存活 `ledger.json` 和最终的 `.md` 研报。
+   - **执行强删令**：`rm -f raw_market_data.json advanced_context.json` 等所有中间废料，当前目录**只允许**存活 `ledger.json` 和最终的 `.md` 研报。
 4. **量化台账登记与极客看板渲染**：
    - 调用 `invoke_subagent` 唤醒 `quant_scorer` (量化裁判) 智能体进行多模态算分。
    - 遵守格式追加写入 `<当前工作区路径>/tracking/ledger.csv`。

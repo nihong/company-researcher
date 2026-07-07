@@ -70,8 +70,11 @@ except Exception as e:
             import pandas as pd
             import datetime
             bs.login()
-            prefix = "sh." if code_clean.startswith(('6')) else "sz."
-            bs_symbol = f"{prefix}{code_clean}"
+            if str(code_clean).endswith('.HK') or str(code_clean).startswith('00') and len(str(code_clean)) == 5:
+                prefix = "hk."
+            else:
+                prefix = "sh." if str(code_clean).startswith(('6')) else "sz."
+            bs_symbol = f"{prefix}{str(code_clean).replace('.HK', '')}"
             
             # Fetch latest daily data
             rs = bs.query_history_k_data_plus(bs_symbol,
@@ -106,9 +109,12 @@ except Exception as e:
         except Exception as e3:
             print(f"[-] Baostock failed: {e3}. Trying Tencent (Basic Fallback via Hist)...")
             try:
-                # 腾讯接口需要加 sh/sz 前缀
-                prefix = "sh" if code_clean.startswith(('6')) else "sz"
-                tx_symbol = f"{prefix}{code_clean}"
+                # 腾讯接口需要加 sh/sz/hk 前缀
+                if str(code_clean).endswith('.HK') or str(code_clean).startswith('00') and len(str(code_clean)) == 5:
+                    prefix = "hk"
+                else:
+                    prefix = "sh" if str(code_clean).startswith(('6')) else "sz"
+                tx_symbol = f"{prefix}{str(code_clean).replace('.HK', '')}"
                 tx_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
                 if not tx_df.empty:
                     last_row = tx_df.iloc[-1]
@@ -141,8 +147,11 @@ try:
 except Exception as e:
     print(f"[-] EastMoney K-line failed: {e}. Trying Tencent...")
     try:
-        prefix = "sh" if code_clean.startswith(('6')) else "sz"
-        tx_symbol = f"{prefix}{code_clean}"
+        if str(code_clean).endswith('.HK') or str(code_clean).startswith('00') and len(str(code_clean)) == 5:
+            prefix = "hk"
+        else:
+            prefix = "sh" if str(code_clean).startswith(('6')) else "sz"
+        tx_symbol = f"{prefix}{str(code_clean).replace('.HK', '')}"
         hist_df = ak.stock_zh_a_hist_tx(symbol=tx_symbol)
         if not hist_df.empty:
             data_dict['kline'] = hist_df.tail(20).to_dict(orient='records')
