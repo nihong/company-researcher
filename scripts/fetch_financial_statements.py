@@ -64,7 +64,32 @@ try:
         if not row.empty:
             record = row.to_dict(orient='records')[0]
             record['report_date'] = fallback_date
-            record['cash_flow_warning'] = "⚠️ 东财业绩报表无现金流数据，请量化打分模块跳过现金流校验，避免盲猜。"
+            
+            # --- 深度财务排雷指标抓取 (Cash Flow & Balance Sheet) ---
+            print(f"[*] Fetching deep financial metrics (Cash flow & Balance sheet) for {fallback_date}...")
+            try:
+                # 抓取现金流量表
+                df_xj = ak.stock_xjll_em(date=fallback_date)
+                xj_row = df_xj[df_xj['股票代码'] == code_clean]
+                if not xj_row.empty:
+                    xj_record = xj_row.to_dict(orient='records')[0]
+                    record['OCF'] = xj_record.get('经营性现金流-现金流量净额', 'N/A')
+                    record['CAPEX'] = xj_record.get('投资性现金流-现金流量净额', 'N/A')
+                    print("[+] Success fetched Cash Flow")
+                
+                # 抓取资产负债表
+                df_zc = ak.stock_zcfz_em(date=fallback_date)
+                zc_row = df_zc[df_zc['股票代码'] == code_clean]
+                if not zc_row.empty:
+                    zc_record = zc_row.to_dict(orient='records')[0]
+                    record['Total_Assets'] = zc_record.get('资产-总资产', 'N/A')
+                    record['Total_Liabilities'] = zc_record.get('负债-总负债', 'N/A')
+                    record['Cash_Equivalents'] = zc_record.get('资产-货币资金', 'N/A')
+                    print("[+] Success fetched Balance Sheet")
+            except Exception as inner_e:
+                print(f"[-] Deep finance fetch failed: {inner_e}")
+                record['cash_flow_warning'] = "⚠️ 深度财务报表抓取超时或无数据，请大模型填写 N/A，严禁自行编造。"
+            
             data_dict["financial_abstract"] = [record]
             print("[+] Success fetched EastMoney YJBB.")
         else:
