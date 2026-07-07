@@ -37,7 +37,8 @@ def fetch_with_fallback():
             df = df.rename(columns={'板块': '板块名称', '涨跌幅': '涨跌幅', '领涨股票名称': '领涨股票'})
             if '领涨股票' not in df.columns:
                 df['领涨股票'] = "-"
-            df['换手率'] = df['涨跌幅'].abs() * 0.8 
+            # 严禁造假：如果新浪接口没有换手率，强行置为 None，不得捏造数据！
+            df['换手率'] = None
             return df, "Sina"
         else:
             print("       [!] 新浪接口返回数据格式异常")

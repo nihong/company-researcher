@@ -37,12 +37,10 @@ run_as: subagent
 
 | 工具 | 用途 | 安装方式 |
 |------|------|----------|
-| `opencli` | 东方财富行情、雪球数据、多模型交叉验证（DeepSeek / 通义千问） | `npm i -g opencli` |
-| `opencli` 适配器 | `deepseek`, `qwen`, `xueqiu`, `eastmoney` | `opencli auth login` 后即用，无需额外安装 |
+| `invoke_subagent` | 原生子智能体调度：唤醒红队评审、量化打分、情绪分析等专家智能体 | 内置工具，无需安装 |
+| `akshare` | 数据网关：东方财富、新浪、腾讯接口的底层数据获取 | 内置于 `scripts/fetch_market_data.py` |
 
-> **模型建议**：本 Skill 涉及红队攻击、多模型交叉验证、防幻觉自检等深度推理任务，建议使用 reasoning 能力较强的模型（如 `deepseek-v4-pro`、`claude-sonnet-4-20250514` 等）。若平台仅提供轻量模型，可信度评级应额外扣减 1 星。
-
-> **分发说明**：若他人 clone 本 Skill，需先安装 `opencli` 并完成 `opencli auth login`，否则数据管道降级为纯网页搜索。报告中将自动标注「⚠️ 数据源降级」。
+> **模型建议**：本 Skill 涉及红队攻击、多模型交叉验证、防幻觉自检等深度推理任务，所有被调度的 Subagent 都会继承您的主大模型能力，建议使用 reasoning 能力较强的模型。
 
 ---
 
@@ -129,19 +127,16 @@ run_as: subagent
 **⚠️ 强制内置源轮询规定**：`akshare` 抓取时，绝对不允许在单一接口报错后立刻放弃。必须在脚本层面或调用逻辑中实现**同源轮询（同花顺 iFinD -> 东方财富 -> 新浪财经 -> 腾讯自选股）**。只有当上述所有接口均因全局网络（如代理断联）完全拒绝连接时，才允许宣告第一梯队失败。
 调用方式：`python scripts/fetch_market_data.py <代码> <输出路径>`
 
-### 第二梯队：机构级命令行终端 (`opencli`，灵活备用)
+### 第二梯队：原生专家智能体大军 (Antigravity Subagents，取代脆弱的 opencli)
 
-当 Python 脚本受限，或需要抓取雪球股民情绪、调用大模型进行交叉验证时，退而求其次使用 `opencli`。
-注意：语法必须使用位置参数（**不要用** `--symbol`）。
+彻底废弃极易超时的 `opencli` 网页大模型调用工具，全面拥抱原生、稳定、可并发的 Antigravity Subagents。
+使用 `invoke_subagent` 工具即可唤醒以下专职智能体：
 
-| 命令 | 用途 | 典型调用 |
-|------|------|----------|
-| `opencli eastmoney quote` | 实时行情 | `opencli eastmoney quote 000001` |
-| `opencli eastmoney kline` | K 线历史数据 | `opencli eastmoney kline 000001 --limit 250` |
-| `opencli eastmoney longhu` | 龙虎榜明细 | `opencli eastmoney longhu 000001` |
-| `opencli eastmoney holders` | 十大流通股东 | `opencli eastmoney holders 000001` |
-| `opencli xueqiu comments` | 个股讨论动态 | `opencli xueqiu comments 000001` |
-| `opencli deepseek ask` | 调度大模型验证 | `opencli deepseek ask "分析宁德时代的护城河"` |
+| 智能体代号 (TypeName) | 文件定义路径 | 用途与分工 |
+|----------------------|-------------|-----------|
+| `red_team_reviewer` | `agents/Red_Team_Review_Agent.md` | **红军极限施压**：对主 Agent 的看多逻辑进行最严厉的证伪攻击。 |
+| `quant_scorer` | `agents/A_Share_Quant_Scorer.md` | **量价多模态交叉评分**：接管最终评级定档，将计算结果写入台账。 |
+| `sentiment_analyzer` | `agents/Sentiment_Analyzer.md` | **股吧散户情绪提取**：原生读取网络舆情并总结散户情绪，取代 opencli 的脆皮爬虫。 |
 
 ### 第三梯队：全网搜索引擎（`search_web`，底线兜底）
 
