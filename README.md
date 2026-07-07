@@ -6,16 +6,16 @@
 **“不仅是发现好公司，更是发现好机会。自上而下看宏观大势，自下而上看资金微操。”**
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![版本](https://img.shields.io/badge/Version-v4.3-success)
-![引擎](https://img.shields.io/badge/Reasoning_Core-DeepSeek_Expert-red)
+![版本](https://img.shields.io/badge/Version-v4.4-success)
+![架构](https://img.shields.io/badge/Architecture-Native_Subagents-red)
 </div>
 
 ---
 
-## 📖 导读：v4.3 终极重构（单技能库·多工作流）
+## 📖 导读：v4.4 原生架构重构（彻底告别 opencli）
 
-在高度博弈的 A 股与港股市场，单纯死磕个股基本面往往会因为“系统性大跌（宏观逆风）”或“买入过早（高潮站岗）”而惨败。
-v4.3 版本完成了从“纯外科手术（个股深扒）”到“全维度量化（宏观+中观+微观）”的终极蜕变。系统现已内嵌**三大工作流**，通过自然语言自动路由分发。
+在高度博弈的 A 股与港股市场，单纯死磕个股基本面往往会因为“系统性大跌”或“高潮站岗”而惨败。
+v4.4 版本完成了重大底层重构：**彻底废弃脆弱且极易超时的 `opencli`，全面拥抱 Antigravity 原生专家智能体大军（Subagents），并引入基于 Playwright 的物理级无头浏览器爬虫，实现对雪球、东方财富、同花顺、淘股吧四大舆情阵地的全网穿透。**
 
 ---
 
@@ -37,11 +37,20 @@ graph TD
     
     B -- "指定具体公司代码" --> E([模式 C: 外科手术级个股深扒])
     E --> E1[前置: fetch_advanced_context.py 抓取宏观天气与竞对]
-    E1 --> E2[严格执行 17 步买方标准化流水线]
-    E2 --> E3[输出: ⚖️ D~S级最终个股研报]
+    E1 --> E1_1[唤醒: sentiment_analyzer 舆情智能体抓取散户痛点]
+    E1_1 --> E2[严格执行 17 步买方标准化流水线]
+    E2 --> E3[唤醒: red_team_reviewer 进行红蓝对抗防守]
+    E3 --> E4[唤醒: quant_scorer 进行量化算分写台账]
+    E4 --> E5[输出: ⚖️ D~S级最终个股研报]
+    
+    B -- "单独查舆情" --> F([模式 D: 单点狙击/纯舆情快照])
+    F --> F1[绕过主干 SOP，直调 Playwright]
+    F1 --> F2[并发穿透雪球/同花顺/东财/淘股吧]
+    F2 --> F3[输出: 🕷️ 散户防站岗情绪简报]
     
     C3 -.->|联动建议| E
     D3 -.->|联动建议| E
+    F3 -.->|视情绪好坏转入| E
     
     classDef red fill:#f9d0c4,stroke:#333,stroke-width:2px;
     class B red;
@@ -65,9 +74,14 @@ graph TD
 - **痛点解决**：让你第一时间坐上刚启动的板块，同时避开已经被游资炒到换手率畸变的“高潮陷阱”。
 
 ### ⚖️ 模式 C：个股外科手术（17 步铁血尽调）
-包含基本面排雷、资金博弈判定、以及极其残酷的**红蓝双向辩论 (Multi-Agent Debate)**。
+包含基本面排雷、资金博弈判定、四大阵地舆情提取，以及极其残酷的**红蓝双向辩论 (Multi-Agent Debate)**。
+- **物理级舆情穿透 (New)**：引入基于 Playwright 的无头浏览器引擎，强行穿透雪球、同花顺、淘股吧的 WAF 防火墙，获取最真实的“反向指标”。
 - **宏观前置拦截**：引入宏观气象台。如果 PMI 收缩且流动性极差，强制剥夺 AI 给予周期/高估值标的 S 级评分的权力。
-- **全局反思与双向辩论 (New)**：彻底摒弃简单的单向风险提示，强制要求主分析师在生成研报前进行跨维度逻辑反思 (Global Reflection)，并与红队风控 Agent 展开 3 个核心问题的深度质询与自证。辩论的胜负将直接决定最终评级的动态升降，挖掘深层“预期差”。
+- **原生大军并发对抗 (New)**：彻底摒弃 opencli。在生成研报前，强制唤醒原生红队风控 Agent (`red_team_reviewer`) 与主分析师展开 3 个核心问题的深度质询与自证。辩论的胜负将直接决定最终评级的动态升降，最后交由量化裁判 Agent (`quant_scorer`) 写台账。
+
+### 🕷️ 模式 D：单点狙击（纯舆情快照）
+专门为打板族或左侧交易者准备的防御模块。不看财报，不看估值，只看散户情绪。
+- **痛点解决**：买入前瞬间判断该股票是否处于散户“极度亢奋”的高潮站岗区，或者是“哀莫大于心死”的左侧无人问津区。
 
 ---
 
@@ -93,8 +107,11 @@ graph TD
 📍 存放路径: ~/.gemini/config/skills/company-researcher/
 ├── SKILL.md                  # 🌟 主干宪法：Router 总闸与任务分发
 ├── README.md                 # 📖 备忘录：本文档说明书
-├── agents/                   # 🧠 智能体人设池 (如红队审查、量化打分)
-├── workflows/                # ⚙️ 核心流水线编排 (如 individual_research_sop.md)
+├── agents/                   # 🧠 原生智能体人设池 (Antigravity Subagents)
+│   ├── Red_Team_Review_Agent.md # 红军风控总监 (极限施压)
+│   ├── A_Share_Quant_Scorer.md  # 量化裁判长 (多模态算分写台账)
+│   └── Sentiment_Analyzer.md    # 舆情分析师 (探测散户拥挤度)
+├── workflows/                # ⚙️ 核心流水线编排
 ├── frameworks/               # 📚 统一理论知识库
 │   ├── china_market/         # 🇨🇳 A股理论 (宏观天气、轮动雷达、红队规则等)
 │   └── hk_market/            # 🇭🇰 港股理论
@@ -109,6 +126,7 @@ graph TD
     ├── scan_sector_rotation.py    # 🚁 扫描引擎：遍历东财行业 Spot 捕捉轮动
     ├── scan_hyper_growth.py       # 🚀 爆破引擎：白名单定向扫描，支持 --support_ma 传参
     ├── fetch_market_data.py       # 🚀 个股网关：抓取 K 线、资金流等基础事实源
+    ├── fetch_xueqiu_sentiment.py  # 🕷️ 舆情探针：基于 Playwright 的四路并发反爬引擎
     └── render_dashboard.py        # 📊 渲染引擎：一键生成全自动极客看板
 
 【2】实体回测与研报库 (Workspace Repository)
