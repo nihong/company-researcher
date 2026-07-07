@@ -3,6 +3,12 @@ import sys
 import json
 import os
 import time
+import urllib.request
+
+# Monkey Patch for macOS
+urllib.request.getproxies = lambda: {}
+os.environ["no_proxy"] = "*"
+os.environ["NO_PROXY"] = "*"
 
 try:
     import akshare as ak
@@ -78,9 +84,19 @@ except Exception as e:
 # 附加：个股估值指标 (PE, PB)
 try:
     print(f"[*] Fetching valuation indicators for {code_clean}...")
-    val_df = ak.stock_a_indicator_lg(symbol=code_clean)
-    if not val_df.empty:
-        profile['valuation'] = val_df.tail(1).to_dict(orient='records')[0]
+    spot_df = ak.stock_zh_a_spot_em()
+    spot_row = spot_df[spot_df['代码'] == code_clean]
+    if not spot_row.empty:
+        pe = spot_row.iloc[0].get('市盈率-动态', 'N/A')
+        pb = spot_row.iloc[0].get('市净率', 'N/A')
+        profile['valuation'] = {'PE_TTM': pe, 'PB': pb}
+
+    # 尝试获取股息率
+    div_df = ak.stock_history_dividend()
+    div_row = div_df[div_df['代码'] == code_clean]
+    if not div_row.empty:
+        profile['dividend_yield'] = div_row.iloc[0].get('累计股息', 'N/A')
+
 except Exception as e:
     profile['valuation_error'] = str(e)
 

@@ -85,7 +85,28 @@ try:
                     record['Total_Assets'] = zc_record.get('资产-总资产', 'N/A')
                     record['Total_Liabilities'] = zc_record.get('负债-总负债', 'N/A')
                     record['Cash_Equivalents'] = zc_record.get('资产-货币资金', 'N/A')
-                    print("[+] Success fetched Balance Sheet")
+                    record['Goodwill'] = zc_record.get('资产-商誉', 'N/A')
+                    try:
+                        gw = float(zc_record.get('资产-商誉', 0) or 0)
+                        eq = float(zc_record.get('负债和股东权益-股东权益合计', 0) or 0)
+                        record['Goodwill_Ratio'] = round(gw / eq * 100, 2) if eq > 0 else 'N/A'
+                    except:
+                        record['Goodwill_Ratio'] = 'N/A'
+                    print("[+] Success fetched Balance Sheet with Goodwill")
+
+                # 获取股权质押情况
+                try:
+                    df_pledge = ak.stock_gpzy_pledge_ratio_em()
+                    p_row = df_pledge[df_pledge['股票代码'] == code_clean]
+                    if not p_row.empty:
+                        record['Pledge_Rate'] = p_row.iloc[0].get('质押比例', 'N/A')
+                        print("[+] Success fetched Pledge Rate")
+                    else:
+                        record['Pledge_Rate'] = 'N/A'
+                except Exception as p_e:
+                    print(f"[-] Pledge rate API failed: {p_e}")
+                    record['Pledge_Rate'] = 'N/A'
+
             except Exception as inner_e:
                 print(f"[-] Deep finance fetch failed: {inner_e}")
                 record['cash_flow_warning'] = "⚠️ 深度财务报表抓取超时或无数据，请大模型填写 N/A，严禁自行编造。"
